@@ -1,0 +1,4 @@
+Class FilterElement {
+    public:
+    private:
+}

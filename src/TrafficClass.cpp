@@ -1,0 +1,5 @@
+class TrafficClass {
+    private:
+    public:
+}
+
