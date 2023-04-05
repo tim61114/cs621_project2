@@ -1,5 +1,4 @@
 class TrafficClass {
     private:
     public:
-}
-
+};

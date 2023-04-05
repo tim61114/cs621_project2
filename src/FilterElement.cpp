@@ -1,4 +1,4 @@
-Class FilterElement {
+class FilterElement {
     public:
     private:
-}
+};
