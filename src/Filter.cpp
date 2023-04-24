@@ -1,4 +1,0 @@
-class Filter {
-    private:
-    public:
-};
