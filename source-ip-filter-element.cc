@@ -1,4 +1,4 @@
-#include "filter-element.cc"
+#include "filter-element.h"
 #include "ns3/ipv4-header.h"
 
 
