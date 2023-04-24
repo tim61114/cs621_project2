@@ -3,19 +3,19 @@
 
 using namespace ns3;
 
-class DestIPAddressFilter : FilterElement {
+class ProtocolNumberFilter : FilterElement {
     private:
-        Ipv4Address destAddr;
+        uint32_t protocolNumber;
 
     public:
-        DestIPAddressFilter(Ipv4Address destIP) {
-            this->destAddr = destIP;
+        ProtocolNumberFilter(uint32_t pn) {
+            this->protocolNumber = pn;
         }
 
         bool match(Ptr<Packet> myPacket) override {
             Ipv4Header header;
             myPacket->PeekHeader(header);
             
-            return header.GetDestination() == this->destAddr;
+            return header.GetProtocol() == this->protocolNumber;
         }
 };

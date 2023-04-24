@@ -1,11 +1,9 @@
 #include "filter-element.h"
 #include "ns3/ipv4-header.h"
 
-
 using namespace ns3;
 
 class SourceIPAddressFilter : FilterElement {
-
     private:
         Ipv4Address sourceAddr;
 
