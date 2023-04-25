@@ -10,7 +10,7 @@ class DestMaskFilter : FilterElement {
         Ipv4Mask subnetMask;
 
     public: 
-        SourceMaskFilter(Ipv4Address subnet, Ipv4Mask mask) {
+        DestMaskFilter(Ipv4Address subnet, Ipv4Mask mask) {
             this->subnetAddress = subnet;
             this->subnetMask = mask;
         }
