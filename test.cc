@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <cassert>
 // #include "ns3/core-module.h"
 // #include "ns3/network-module.h"
 //#include "filter-element.cc"
@@ -34,12 +33,12 @@ void TestSourceIPFilter() {
 
     //Matching "102.102.102.102 with 102.102.102.102"
     SourceIPAddressFilter s1(address1);
-    assert(s1.match(pkt));
+    NS_ASSERT(s1.match(pkt));
     printf("#Test case 1 passed\n");
 
     //Matching "102.102.102.103 with 102.102.102.102"
     SourceIPAddressFilter s2(address2);
-    assert(!s2.match(pkt));
+    NS_ASSERT(!s2.match(pkt));
     printf("#Test case 2 passed\n");
 
 }
@@ -53,12 +52,12 @@ void TestDestIPFilter() {
 
     //Matching "102.102.102.102 with 102.102.102.102"
     DestIPAddressFilter s1(address1);
-    assert(s1.match(pkt));
+    NS_ASSERT(s1.match(pkt));
     printf("#Test case 1 passed\n");
 
     //Matching "102.102.102.103 with 102.102.102.102"
     DestIPAddressFilter s2(address2);
-    assert(!s2.match(pkt));
+    NS_ASSERT(!s2.match(pkt));
     printf("#Test case 2 passed\n");
 
 }
@@ -74,17 +73,17 @@ void TestSourceMaskFilter() {
 
     //Matching "102.102.102.102 with mask 255.255.0.0 with 102.102.102.102"
     SourceMaskFilter s1(address1, mask1);
-    assert(s1.match(pkt1));
+    NS_ASSERT(s1.match(pkt1));
     printf("#Test case 1 passed\n");
 
     //Matching "102.102.0.1 with mask 255.255.0.0 with 102.102.102.102"
     SourceMaskFilter s2(address2, mask1);
-    assert(s2.match(pkt1));
+    NS_ASSERT(s2.match(pkt1));
     printf("#Test case 2 passed\n");
 
     //Matching "102.101.0.1 with mask 255.255.0.0 with 102.102.102.102"
     SourceMaskFilter s3(address3, mask1);
-    assert(!s3.match(pkt1));
+    NS_ASSERT(!s3.match(pkt1));
     printf("#Test case 3 passed\n");
 
 }
@@ -100,17 +99,17 @@ void TestDestMaskFilter() {
 
     //Matching "102.102.102.102 with mask 255.255.0.0 with 102.102.102.102"
     DestMaskFilter s1(address1, mask1);
-    assert(s1.match(pkt1));
+    NS_ASSERT(s1.match(pkt1));
     printf("#Test case 1 passed\n");
 
     //Matching "102.102.0.1 with mask 255.255.0.0 with 102.102.102.102"
     DestMaskFilter s2(address2, mask1);
-    assert(s2.match(pkt1));
+    NS_ASSERT(s2.match(pkt1));
     printf("#Test case 2 passed\n");
 
     //Matching "102.101.0.1 with mask 255.255.0.0 with 102.102.102.102"
     DestMaskFilter s3(address3, mask1);
-    assert(!s3.match(pkt1));
+    NS_ASSERT(!s3.match(pkt1));
     printf("#Test case 3 passed\n");
 
 }
