@@ -6,6 +6,9 @@
 
 namespace ns3{
 
+    const uint8_t TCP_Protocol_Number = 6;
+    const uint8_t UDP_Protocol_Number = 17;
+
 class FilterElement {
     public: 
         virtual bool match(Ptr<ns3::Packet> myPackets) = 0;
