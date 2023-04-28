@@ -1,9 +1,9 @@
-#include "source-ip-filter-element.cc"
-#include "source-mask-filter-element.cc"
-#include "dest-ip-filter-element.cc"
-#include "dest-mask-filter-element.cc"
-#include "source-port-filter-element.cc"
-#include "dest-port-filter-element.cc"
+#include "src/lib/filter-element/source-ip-filter-element.cc"
+#include "src/lib/filter-element/source-mask-filter-element.cc"
+#include "src/lib/filter-element/dest-ip-filter-element.cc"
+#include "src/lib/filter-element/dest-mask-filter-element.cc"
+#include "src/lib/filter-element/source-port-filter-element.cc"
+#include "src/lib/filter-element/dest-port-filter-element.cc"
 
 using namespace ns3;
 
