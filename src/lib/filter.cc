@@ -8,8 +8,8 @@ class Filter {
         std::vector<FilterElement> elements;
         
         bool match(Ptr<Packet> p) {
-            for (size_t i = 0; i < elements.size(); i++) {
-                if (!elements[i].match(p)) {
+            for (auto &fe : elements) {
+                if (!fe.match(p)) {
                     return false;
                 }
             }
