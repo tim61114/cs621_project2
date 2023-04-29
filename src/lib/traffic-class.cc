@@ -30,7 +30,7 @@ class TrafficClass {
 
         // return true if queue is not full and matches all filters
         bool Enqueue(Ptr<Packet> p) {
-            if ( !isFull() || !match(p)) {
+            if (isFull() || !match(p)) {
                 return false;
             }
 
@@ -48,8 +48,8 @@ class TrafficClass {
 
         // return true if the packet matches all filters
         bool match(Ptr<Packet> p) {
-            for (size_t i = 0; i < filters.size(); i++) {
-                if (!filters[i].match(p)) {
+            for (Filter f : filters) {
+                if (!f.match(p)) {
                     return false;
                 }
             }
