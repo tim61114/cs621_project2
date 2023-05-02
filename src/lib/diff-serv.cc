@@ -6,11 +6,12 @@
 
 using namespace ns3;
 
-class DiffServ : public Queue<Packet> {
-    private:
-        // std::vector<TrafficClass*> q_class;
 
-        bool DoEnqueue(Ptr<Packet> p) {
+class DiffServ : Queue<Packet> {
+    private:
+        std::vector<TrafficClass*> q_class;
+
+        bool DoEnqueue(Ptr<Packet> p) override {
             uint32_t index = Classify(p);
             return q_class[index]->Enqueue(p);
         }
@@ -22,6 +23,7 @@ class DiffServ : public Queue<Packet> {
         Ptr<Packet> DoRemove() {
             return Schedule();
         }
+
 
         Ptr<const Packet> DoPeek() const {
             return 0; // TODO:
@@ -54,3 +56,4 @@ class DiffServ : public Queue<Packet> {
             return DoRemove();
         }
 };  
+
