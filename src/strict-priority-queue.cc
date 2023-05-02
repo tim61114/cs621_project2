@@ -1,8 +1,10 @@
 #include <vector>
-#include "src/lib/traffic_class.cc"
-#include "src/lib/filter.cc"
-#include "src/lib/filter-element/diff-serv.cc"
-#include "src/lib/filter-element/dest-port-filter-element.cc"
+
+#include "./lib/filter.cc"
+#include "./lib/diff-serv.cc"
+#include "./lib/filter-element/dest-port-filter-element.cc"
+#include "./lib/filter-element/filter-element.h"
+#include "./lib/traffic-class.cc"
 
 using namespace ns3;
 
@@ -11,7 +13,7 @@ class StrictPriorityQueue : DiffServ {
         // return the next packet
         Ptr<Packet> DoPeek() {
             Ptr<Packet> p;
-            for (TrafficClass tc : q_class) {
+            for (TrafficClass *tc : q_class) {
                 if (!tc->isEmpty()) {
                     return tc->DoPeek();
                 }
@@ -21,7 +23,7 @@ class StrictPriorityQueue : DiffServ {
         }
 
         bool compareByPriority(const std::vector<uint32_t, uint16_t>& vec1, const std::vector<uint32_t, uint16_t> vec2) {
-            return vev1[0] < vec2[0];
+            return vec1[0] < vec2[0];
         }
 
         void InitializeTrafficClass(uint32_t queueNumber, std::vector<std::vector<uint32_t, uint16_t>>& priorityPortList) {
@@ -32,12 +34,14 @@ class StrictPriorityQueue : DiffServ {
             for (uint32_t i = 0; i < queueNumber; i++) {
                 uint32_t priorityLevel = priorityPortList[i][0];
                 uint16_t destPort = priorityPortList[i][1];
-                TrafficClass* tc = new TrafficClass(priorityLevel);
+                TrafficClass* tc = new TrafficClass();
                 tc->setPriorityLevel(priorityPortList[i][0]);
                 DestPortNumberFilter destPortFilter(destPort);
+                FilterElement *fe = new DestPortNumberFilter(destPort);
+        
                 Filter filter;
-                filter.elements.push_back(destPortFilter);
-                tc->filters.push_back(filter);
+                filter.elements.push_back(fe);
+                tc->filters.push_back(&filter);
                 q_class.push_back(tc);
             } 
         }
@@ -74,7 +78,7 @@ class StrictPriorityQueue : DiffServ {
             uint32_t classIndex = Classify(p);
 
             // drop packet if enqueue fails
-            if (q_class[classIndex]->Enqueue(p)) {
+            if (!q_class[classIndex]->Enqueue(p)) {
                 Drop(p);
                 return false;
             }

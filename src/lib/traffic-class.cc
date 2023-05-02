@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cmath>
 #include <queue>
-#include "src/lib/filter.cc"
+#include "filter.cc"
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
 
@@ -48,8 +48,8 @@ class TrafficClass {
 
         // return true if the packet matches all filters
         bool match(Ptr<Packet> p) {
-            for (Filter f : filters) {
-                if (!f.match(p)) {
+            for (Filter *f : filters) {
+                if (!f->match(p)) {
                     return false;
                 }
             }
