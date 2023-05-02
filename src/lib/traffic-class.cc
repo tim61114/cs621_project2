@@ -19,7 +19,7 @@ class TrafficClass {
         
 
     public:
-        std::vector<Filter> filters;
+        std::vector<Filter*> filters;
 
         TrafficClass() {
             this->packets = 0;
@@ -60,6 +60,10 @@ class TrafficClass {
             return packets >= maxPackets;
         }
 
+        bool isEmpty() {
+            return packets == 0;
+        }
+
         uint32_t getMaxPackets() {
             return maxPackets;
         }
@@ -98,5 +102,12 @@ class TrafficClass {
             }
             this->priorityLevel = priorityLevel;
             return true;
+        }
+
+        Ptr<Packet> DoPeek() {
+            if (!isEmpty()) {
+                return m_queue.front();
+            }
+            return nullptr;
         }
 };
