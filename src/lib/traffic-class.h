@@ -1,8 +1,11 @@
+#ifndef TRAFFIC_CLASS_H
+#define TRAFFIC_CLASS_H
+
 #include <vector>
 #include <cstdint>
 #include <cmath>
 #include <queue>
-#include "src/lib/filter.cc"
+#include "filter.h"
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
 
@@ -19,7 +22,7 @@ class TrafficClass {
         
 
     public:
-        std::vector<Filter> filters;
+        std::vector<Filter*> filters;
 
         TrafficClass() {
             this->packets = 0;
@@ -40,16 +43,19 @@ class TrafficClass {
         };
 
         Ptr<Packet> Dequeue() {
+            Ptr<Packet> pkt = 0;
             if (packets > 0) {
-                m_queue.pop();
                 packets--;
+                pkt = m_queue.front();
+                m_queue.pop();
             }
+            return pkt;
         }
 
         // return true if the packet matches all filters
         bool match(Ptr<Packet> p) {
-            for (Filter f : filters) {
-                if (!f.match(p)) {
+            for (Filter *f : filters) {
+                if (!f->match(p)) {
                     return false;
                 }
             }
@@ -58,6 +64,10 @@ class TrafficClass {
         
         bool isFull() {
             return packets >= maxPackets;
+        }
+
+        bool isEmpty() {
+            return packets == 0;
         }
 
         uint32_t getMaxPackets() {
@@ -99,4 +109,14 @@ class TrafficClass {
             this->priorityLevel = priorityLevel;
             return true;
         }
+
+        Ptr<Packet> DoPeek() {
+            if (!isEmpty()) {
+                return m_queue.front();
+            }
+            return nullptr;
+        }
 };
+
+
+#endif

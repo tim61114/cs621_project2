@@ -1,10 +1,11 @@
 #include <vector>
 #include <cstdint>
-#include "traffic-class.cc"
-#include "filter.cc"
+#include "traffic-class.h"
+#include "filter.h"
 #include "ns3/queue.h"
 
 using namespace ns3;
+
 
 class DiffServ : Queue<Packet> {
     private:
@@ -23,11 +24,14 @@ class DiffServ : Queue<Packet> {
             return Schedule();
         }
 
-        Ptr<Packet> DoPeek() {
-            
+
+        Ptr<const Packet> DoPeek() const {
+            return 0; // TODO:
         }
 
     public:
+        std::vector<TrafficClass*> q_class;
+        
         Ptr<Packet> Schedule() {
             return 0;
         }
@@ -40,8 +44,16 @@ class DiffServ : Queue<Packet> {
             return DoEnqueue(p);
         }
 
-        Ptr<Packet> Dequeue<>() override {
+        Ptr<Packet> Dequeue() override {
             return DoDequeue();
         }
+
+        Ptr<const Packet> Peek() const  {
+            return DoPeek();
+        }
         
-};
+        Ptr<Packet> Remove() override {
+            return DoRemove();
+        }
+};  
+

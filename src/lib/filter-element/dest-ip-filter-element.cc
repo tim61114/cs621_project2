@@ -3,7 +3,7 @@
 
 using namespace ns3;
 
-class DestIPAddressFilter : FilterElement {
+class DestIPAddressFilter : public FilterElement {
     private:
         Ipv4Address destAddr;
 

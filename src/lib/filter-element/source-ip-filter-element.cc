@@ -3,7 +3,7 @@
 
 using namespace ns3;
 
-class SourceIPAddressFilter : FilterElement {
+class SourceIPAddressFilter : public FilterElement {
     private:
         Ipv4Address sourceAddr;
 

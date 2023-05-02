@@ -3,7 +3,7 @@
 
 using namespace ns3;
 
-class ProtocolNumberFilter : FilterElement {
+class ProtocolNumberFilter : public FilterElement {
     private:
         uint32_t protocolNumber;
 
