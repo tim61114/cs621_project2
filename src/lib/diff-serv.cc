@@ -7,33 +7,41 @@
 using namespace ns3;
 
 class DiffServ : Queue<Packet> {
-    protected:
-        std::vector<TrafficClass> q_class;
+    private:
+        std::vector<TrafficClass*> q_class;
 
-    public:
         bool DoEnqueue(Ptr<Packet> p) override {
-            for (auto& tc : q_class) {
-                if (!tc.match(p) || tc.isFull()) {
-                    continue;
-                }
-                return tc.Enqueue(p);
-            }
-            // Packet dropped.
-            return false;
+            uint32_t index = Classify(p);
+            return q_class[index]->Enqueue(p);
         }
 
+        Ptr<Packet> DoDequeue() {
+            return Schedule();
+        }
+
+        Ptr<Packet> DoRemove() {
+            return Schedule();
+        }
+
+        Ptr<Packet> DoPeek() {
+            
+        }
+
+    public:
         Ptr<Packet> Schedule() {
-            return DoDequeue();
+            return 0;
         }
 
         uint32_t Classify(Ptr<Packet> p) {
-            for (auto& tc : q_class) {
-                if (tc.match(p) && !tc.isFull()) {
-                    return tc.getPriorityLevel();
-                }
-            }
-
-            return -1;
+            return 0;
         }
 
+        bool Enqueue(Ptr<Packet> p) override {
+            return DoEnqueue(p);
+        }
+
+        Ptr<Packet> Dequeue<>() override {
+            return DoDequeue();
+        }
+        
 };
