@@ -1,8 +1,11 @@
+#ifndef TRAFFIC_CLASS_H
+#define TRAFFIC_CLASS_H
+
 #include <vector>
 #include <cstdint>
 #include <cmath>
 #include <queue>
-#include "filter.cc"
+#include "filter.h"
 #include "ns3/packet.h"
 #include "ns3/ptr.h"
 
@@ -40,10 +43,13 @@ class TrafficClass {
         };
 
         Ptr<Packet> Dequeue() {
+            Ptr<Packet> pkt = 0;
             if (packets > 0) {
-                m_queue.pop();
                 packets--;
+                pkt = m_queue.front();
+                m_queue.pop();
             }
+            return pkt;
         }
 
         // return true if the packet matches all filters
@@ -111,3 +117,6 @@ class TrafficClass {
             return nullptr;
         }
 };
+
+
+#endif

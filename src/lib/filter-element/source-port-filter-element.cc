@@ -6,7 +6,7 @@
 using namespace ns3;
 
 // only filters port number in TCP and UDP
-class SourcePortNumberFilter : FilterElement {
+class SourcePortNumberFilter : public FilterElement {
     private:
         uint32_t sourcePortNumber;
 

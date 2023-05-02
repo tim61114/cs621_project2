@@ -4,7 +4,7 @@
 
 using namespace ns3;
 
-class DestMaskFilter : FilterElement {
+class DestMaskFilter : public FilterElement {
     private:
         Ipv4Address subnetAddress;
         Ipv4Mask subnetMask;

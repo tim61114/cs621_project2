@@ -1,3 +1,5 @@
+#ifndef FILTER_H
+#define FILTER_H
 #include <vector>
 #include "./filter-element/filter-element.h"
 
@@ -8,7 +10,7 @@ class Filter {
         std::vector<FilterElement* > elements;
         
         bool match(Ptr<Packet> p) {
-            for (auto &fe : elements) {
+            for (auto fe : elements) {
                 if (!fe->match(p)) {
                     return false;
                 }
@@ -18,3 +20,5 @@ class Filter {
         }
 
 };
+
+#endif

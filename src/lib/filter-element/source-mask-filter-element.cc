@@ -4,7 +4,7 @@
 
 using namespace ns3;
 
-class SourceMaskFilter : FilterElement {
+class SourceMaskFilter : public FilterElement {
     private:
         Ipv4Address subnetAddress;
         Ipv4Mask subnetMask;

@@ -6,7 +6,7 @@
 using namespace ns3;
 
 // only filters port number in TCP and UDP
-class DestPortNumberFilter : FilterElement {
+class DestPortNumberFilter : public FilterElement {
     private:
         uint32_t destPortNumber;
 
