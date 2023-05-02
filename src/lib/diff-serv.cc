@@ -1,47 +1,47 @@
-//#include <vector>
-//#include <cstdint>
-//#include "traffic-class.cc"
-//#include "filter.cc"
-//#include "ns3/queue.h"
-//
-//using namespace ns3;
-//
-//class DiffServ : Queue<Packet> {
-//    private:
-//        QueueMode m_mode;
-//        std::vector<TrafficClass> q_class;
-//
-//    public:
-//        bool DoEnqueue(Ptr<Packet> p) override {
-//
-//        }
-//
-//        Ptr<Packet> DoDequeue() override {
-//
-//        }
-//
-//        Ptr<Packet> DoRemove() override {
-//
-//        }
-//
-//        const Ptr<Packet> DoPeek() override {
-//
-//        }
-//
-//        void SetMode(QueueMode mode) override {
-//
-//        }
-//
-//        QueueMode GetMode() override {
-//            
-//        }
-//
-//        Ptr<Packet> Schedule() override {
-//
-//        }
-//
-//        uint32_t Classify(Ptr<Packet> p) override {
-//            
-//        }
-//
-//};
+#include <vector>
+#include <cstdint>
+#include "traffic-class.cc"
+#include "filter.cc"
+#include "ns3/queue.h"
+
+using namespace ns3;
+
+class DiffServ : Queue<Packet> {
+    private:
+        std::vector<TrafficClass*> q_class;
+
+        bool DoEnqueue(Ptr<Packet> p) override {
+            uint32_t index = Classify(p);
+            return q_class[index]->Enqueue(p);
+        }
+
+        Ptr<Packet> DoDequeue() {
+            return Schedule();
+        }
+
+        Ptr<Packet> DoRemove() {
+            return Schedule();
+        }
+
+        Ptr<Packet> DoPeek() {
+            
+        }
+
+    public:
+        Ptr<Packet> Schedule() {
+            return 0;
+        }
+
+        uint32_t Classify(Ptr<Packet> p) {
+            return 0;
+        }
+
+        bool Enqueue(Ptr<Packet> p) override {
+            return DoEnqueue(p);
+        }
+
+        Ptr<Packet> Dequeue<>() override {
+            return DoDequeue();
+        }
+        
+};
