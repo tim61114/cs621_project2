@@ -130,16 +130,13 @@ class StrictPriorityQueue : public DiffServ {
                 
                 TrafficClass* tc = new TrafficClass();
                 tc->setPriorityLevel(priorityLevel);
-                // DestPortNumberFilter destPortFilter(destPort);
-                // FilterElement *fe = &destPortFilter;
-                DestPortNumberFilter* destPortFilter = new DestPortNumberFilter(destPort);
-                Filter filter;
-                filter.elements.push_back(destPortFilter);
-                printf("elements length - spq %d\n", filter.elements.size());
-                tc->filters.push_back(&filter);
-                printf("filters length %d\n", tc->filters.size());
+                DestPortNumberFilter* destPortFilter1 = new DestPortNumberFilter(destPort);
+                Filter* filter = new Filter();
+                DestPortNumberFilter* destPortFilter2 = new DestPortNumberFilter(destPort);
+                filter->elements.push_back(destPortFilter1);
+                filter->elements.push_back(destPortFilter2);
+                tc->filters.push_back(filter);
                 q_class.push_back(tc);
-                printf("traffic class %d\n", q_class.size());
             } 
         }
     public: 

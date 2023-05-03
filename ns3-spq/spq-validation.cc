@@ -101,32 +101,32 @@ main ()
     ftpA.SetAttribute("SendSize", UintegerValue(tcp_adu_size));
     ftpA.SetAttribute("MaxBytes", UintegerValue(DEFAULT_DATA_BYTES));
     ApplicationContainer ftpAppContA = ftpA.Install(nodes.Get(0));
-    // ftpAppContA.Start(Seconds(appAStartTime));
-    // ftpAppContA.Stop(Seconds(appAEndTime));
+    ftpAppContA.Start(Seconds(appAStartTime));
+    ftpAppContA.Stop(Seconds(appAEndTime));
 
-    // // Create FTP applciation B and install it on node0
-    // AddressValue node1Bddress(InetSocketAddress(interface2.GetAddress(1), node1PortB));  //receiver node1's address
-    // BulkSendHelper ftpB("ns3::TcpSocketFactory", Address());
-    // ftpB.SetAttribute("Remote", node1Address);
-    // ftpB.SetAttribute("SendSize", UintegerValue(tcp_adu_size));
-    // ftpB.SetAttribute("MaxBytes", UintegerValue(DEFAULT_DATA_BYTES));
-    // ApplicationContainer ftpAppContB = ftpB.Install(nodes.Get(0));
-    // ftpAppContB.Start(Seconds(appBStartTime));
-    // ftpAppContB.Stop(Seconds(appBEndTime));
+    // Create FTP applciation B and install it on node0
+    AddressValue node1Bddress(InetSocketAddress(interface2.GetAddress(1), node1PortB));  //receiver node1's address
+    BulkSendHelper ftpB("ns3::TcpSocketFactory", Address());
+    ftpB.SetAttribute("Remote", node1Address);
+    ftpB.SetAttribute("SendSize", UintegerValue(tcp_adu_size));
+    ftpB.SetAttribute("MaxBytes", UintegerValue(DEFAULT_DATA_BYTES));
+    ApplicationContainer ftpAppContB = ftpB.Install(nodes.Get(0));
+    ftpAppContB.Start(Seconds(appBStartTime));
+    ftpAppContB.Stop(Seconds(appBEndTime));
 
-    // // Create a packet sinkc application A and install it on node1
-    // PacketSinkHelper sinkA("ns3::TcpSocketFactory",
-    //                      InetSocketAddress (Ipv4Address::GetAny(), node1PortA));
-    // ApplicationContainer sinkAppContA = sinkA.Install(nodes.Get(2));
-    // sinkAppContA.Start(Seconds(DEFAULT_START_TIME));
-    // sinkAppContA.Stop(Seconds(DEFAULT_END_TIME));
+    // Create a packet sinkc application A and install it on node1
+    PacketSinkHelper sinkA("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny(), node1PortA));
+    ApplicationContainer sinkAppContA = sinkA.Install(nodes.Get(2));
+    sinkAppContA.Start(Seconds(DEFAULT_START_TIME));
+    sinkAppContA.Stop(Seconds(DEFAULT_END_TIME));
 
-    // // Create a packet sinkc application B and install it on node1
-    // PacketSinkHelper sinkB("ns3::TcpSocketFactory",
-    //                      InetSocketAddress (Ipv4Address::GetAny(), node1PortB));
-    // ApplicationContainer sinkAppContB = sinkB.Install(nodes.Get(2));
-    // sinkAppContB.Start(Seconds(DEFAULT_START_TIME));
-    // sinkAppContB.Stop(Seconds(DEFAULT_END_TIME));
+    // Create a packet sinkc application B and install it on node1
+    PacketSinkHelper sinkB("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny(), node1PortB));
+    ApplicationContainer sinkAppContB = sinkB.Install(nodes.Get(2));
+    sinkAppContB.Start(Seconds(DEFAULT_START_TIME));
+    sinkAppContB.Stop(Seconds(DEFAULT_END_TIME));
 
 
 
