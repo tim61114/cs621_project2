@@ -10,6 +10,7 @@ class Filter {
         std::vector<FilterElement* > elements;
         
         bool match(Ptr<Packet> p) {
+            printf("elements length %d\n", elements.size());
             for (auto fe : elements) {
                 if (!fe->match(p)) {
                     return false;

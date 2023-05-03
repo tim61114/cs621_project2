@@ -10,7 +10,6 @@
 #include "ns3/internet-module.h"
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
-#include "./model/strict-priority-queue.h"
 #include "./model/strict-priority-queue.cc"
 
 
@@ -68,12 +67,10 @@ main ()
     NetDeviceContainer devices2 = p2p.Install(nodes.Get(1), nodes.Get(2));
 
     // set spq to R1
-    // Ptr<StrictPriorityQueue> spqR1 = CreateObject<StrictPriorityQueue>(queueNumber, priorityPortList);
-    // Ptr<StrictPriorityQueue> spqR1 = CreateObject<StrictPriorityQueue>();
-    StrictPriorityQueue spq(queueNumber);
+    Ptr<StrictPriorityQueue> spqR1 = CreateObject<StrictPriorityQueue>(queueNumber, priorityPortList);   
     //TODO: set up the queue, traffic class ? filter?
-    // Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
-    // devR1->SetQueue(spqR1);
+    Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
+    devR1->SetQueue(spqR1);
 
     // Create the Internet stacks
     InternetStackHelper stack;
@@ -96,14 +93,14 @@ main ()
 
     // Create applications
 
-    // // Create a FTP applicationA and install it on node0
-    // Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(tcp_adu_size));
-    // AddressValue node1Address(InetSocketAddress(interface2.GetAddress(1), node1PortA));  //receiver node1's address
-    // BulkSendHelper ftpA ("ns3::TcpSocketFactory", Address());
-    // ftpA.SetAttribute("Remote", node1Address);
-    // ftpA.SetAttribute("SendSize", UintegerValue(tcp_adu_size));
-    // ftpA.SetAttribute("MaxBytes", UintegerValue(DEFAULT_DATA_BYTES));
-    // ApplicationContainer ftpAppContA = ftpA.Install(nodes.Get(0));
+    // Create a FTP applicationA and install it on node0
+    Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(tcp_adu_size));
+    AddressValue node1Address(InetSocketAddress(interface2.GetAddress(1), node1PortA));  //receiver node1's address
+    BulkSendHelper ftpA ("ns3::TcpSocketFactory", Address());
+    ftpA.SetAttribute("Remote", node1Address);
+    ftpA.SetAttribute("SendSize", UintegerValue(tcp_adu_size));
+    ftpA.SetAttribute("MaxBytes", UintegerValue(DEFAULT_DATA_BYTES));
+    ApplicationContainer ftpAppContA = ftpA.Install(nodes.Get(0));
     // ftpAppContA.Start(Seconds(appAStartTime));
     // ftpAppContA.Stop(Seconds(appAEndTime));
 
