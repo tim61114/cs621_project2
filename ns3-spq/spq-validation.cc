@@ -10,6 +10,7 @@
 #include "ns3/internet-module.h"
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
+
 #include "./model/strict-priority-queue.cc"
 
 
@@ -28,13 +29,17 @@ Ptr<PointToPointNetDevice> NetDeviceDynamicCast (Ptr<NetDevice> const&p)
 
 int 
 main () 
-{
-    uint16_t node1PortA = 9000;     // high priority 
-    uint16_t node1PortB = 9500;     // low priority
-    //uint16_t routerPort = 8000;
+{   
+    uint32_t queueNumber = 2;
+    u_int32_t PriorityA = 0;
+    u_int32_t PriorityB = 1;
+
+    uint16_t node0PortA = 9000;     // high priority source port
+    uint16_t node0PortB = 9500;     // low priority source port
+    uint16_t node1Port = 8000;     // Destination port
     uint32_t tcp_adu_size = 946;
 
-    uint32_t DEFAULT_DATA_BYTES = 1073741824;  // 0.1
+    // uint32_t DEFAULT_DATA_BYTES = 1073741824;  // 0.1
     double DEFAULT_START_TIME = 0.0;
     double DEFAULT_END_TIME = 100000000.0;
 
@@ -44,11 +49,6 @@ main ()
     double appBEndTime = DEFAULT_END_TIME;
 
     //uint32_t DEFAULT_QUEUE_SIZE = 655350000;
-
-    uint32_t queueNumber = 2;
-    std::vector<std::pair<uint32_t, uint16_t>> priorityPortList;
-    priorityPortList.push_back(std::make_pair(0, node1PortA));
-    priorityPortList.push_back(std::make_pair(1, node1PortB));
 
     // TODO: allow setting by config file
 
@@ -67,10 +67,22 @@ main ()
     NetDeviceContainer devices2 = p2p.Install(nodes.Get(1), nodes.Get(2));
 
     // set spq to R1
-    Ptr<StrictPriorityQueue> spqR1 = CreateObject<StrictPriorityQueue>(queueNumber, priorityPortList);   
-    //TODO: set up the queue, traffic class ? filter?
+    // Ptr<StrictPriorityQueue> spqR1 = CreateObject<StrictPriorityQueue>(queueNumber, priorityPortList);   
+    // //TODO: set up the queue, traffic class ? filter?
+    // Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
+    // devR1->SetQueue(spqR1);
+
+    ObjectFactory m_spqFactory;
+    m_spqFactory.SetTypeId("StrictPriorityQueue");
+    m_spqFactory.Set("QueueNumber", UintegerValue(queueNumber));
+    m_spqFactory.Set("FirstPriority", UintegerValue(PriorityA));
+    m_spqFactory.Set("FirstPort", UintegerValue(node0PortA));
+    m_spqFactory.Set("SecondPriority", UintegerValue(PriorityB));
+    m_spqFactory.Set("SecondPort", UintegerValue(node0PortB));
+
+    Ptr<StrictPriorityQueue> spq = m_spqFactory.Create<StrictPriorityQueue>();
     Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
-    devR1->SetQueue(spqR1);
+    devR1->SetQueue(spq);
 
     // Create the Internet stacks
     InternetStackHelper stack;
@@ -93,41 +105,42 @@ main ()
 
     // Create applications
 
-    // Create a FTP applicationA and install it on node0
+    
     Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(tcp_adu_size));
-    AddressValue node1Address(InetSocketAddress(interface2.GetAddress(1), node1PortA));  //receiver node1's address
-    BulkSendHelper ftpA ("ns3::TcpSocketFactory", Address());
-    ftpA.SetAttribute("Remote", node1Address);
-    ftpA.SetAttribute("SendSize", UintegerValue(tcp_adu_size));
-    ftpA.SetAttribute("MaxBytes", UintegerValue(DEFAULT_DATA_BYTES));
-    ApplicationContainer ftpAppContA = ftpA.Install(nodes.Get(0));
-    ftpAppContA.Start(Seconds(appAStartTime));
-    ftpAppContA.Stop(Seconds(appAEndTime));
+    // set destination ip and port
+    AddressValue node1Address(InetSocketAddress(interface2.GetAddress(1), node1Port));  //receiver node1's address
+    BulkSendHelper BulkSendHelper ("ns3::TcpSocketFactory", Address());
+    Ipv4Address node0IP =  interface1.GetAddress(0);
 
-    // Create FTP applciation B and install it on node0
-    AddressValue node1Bddress(InetSocketAddress(interface2.GetAddress(1), node1PortB));  //receiver node1's address
-    BulkSendHelper ftpB("ns3::TcpSocketFactory", Address());
-    ftpB.SetAttribute("Remote", node1Address);
-    ftpB.SetAttribute("SendSize", UintegerValue(tcp_adu_size));
-    ftpB.SetAttribute("MaxBytes", UintegerValue(DEFAULT_DATA_BYTES));
-    ApplicationContainer ftpAppContB = ftpB.Install(nodes.Get(0));
-    ftpAppContB.Start(Seconds(appBStartTime));
-    ftpAppContB.Stop(Seconds(appBEndTime));
+    // configure source ip and port for application A
+    ApplicationContainer appContA = BulkSendHelper.Install(nodes.Get(0));
+    Ptr<BulkSendApplication> bulkSendApplicationA = DynamicCast<BulkSendApplication>(appContA.Get(0));
+    AddressValue node0AddressA(InetSocketAddress(node0IP, node0PortA));
+    bulkSendApplicationA->SetAttribute("Local", node0AddressA);
+    
+    appContA.Start(Seconds(appAStartTime));
+    appContA.Stop(Seconds(appAEndTime));
+    // bulkSendApplicationA->SetStartTime(Seconds(appAStartTime));
+    // bulkSendApplicationA->SetStopTime(Seconds(appAEndTime));
+
+
+    // Create applciation B and install it on node0
+    ApplicationContainer appContB = BulkSendHelper.Install(nodes.Get(0));
+    Ptr<BulkSendApplication> bulkSendApplicationB = DynamicCast<BulkSendApplication>(appContB.Get(0));
+    AddressValue node0AddressB(InetSocketAddress(node0IP, node0PortB));     // same address with A, diff port
+    bulkSendApplicationB->SetAttribute("Local", node0AddressB);
+    
+    appContA.Start(Seconds(appBStartTime));
+    appContA.Stop(Seconds(appBEndTime));
+    // bulkSendApplicationB->SetStartTime(Seconds(appBStartTime));
+    // bulkSendApplicationB->SetStopTime(Seconds(appBEndTime));
 
     // Create a packet sinkc application A and install it on node1
-    PacketSinkHelper sinkA("ns3::TcpSocketFactory",
-                         InetSocketAddress (Ipv4Address::GetAny(), node1PortA));
-    ApplicationContainer sinkAppContA = sinkA.Install(nodes.Get(2));
+    PacketSinkHelper sink("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny(), node1Port));
+    ApplicationContainer sinkAppContA = sink.Install(nodes.Get(2));
     sinkAppContA.Start(Seconds(DEFAULT_START_TIME));
     sinkAppContA.Stop(Seconds(DEFAULT_END_TIME));
-
-    // Create a packet sinkc application B and install it on node1
-    PacketSinkHelper sinkB("ns3::TcpSocketFactory",
-                         InetSocketAddress (Ipv4Address::GetAny(), node1PortB));
-    ApplicationContainer sinkAppContB = sinkB.Install(nodes.Get(2));
-    sinkAppContB.Start(Seconds(DEFAULT_START_TIME));
-    sinkAppContB.Stop(Seconds(DEFAULT_END_TIME));
-
 
 
     Simulator::Run();

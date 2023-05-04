@@ -24,11 +24,11 @@ class DiffServ : public Queue<Packet> {
         }
 
         Ptr<const Packet> DoPeek() const {
-            return 0; // TODO:
+            return 0; // TODO: ???
         }
 
     public:
-        std::vector<TrafficClass*> q_class;
+        std::vector<TrafficClass*> q_class; // TODO: change to protected
         
         Ptr<Packet> Schedule() {
             return 0;
