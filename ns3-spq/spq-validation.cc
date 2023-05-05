@@ -18,7 +18,7 @@
 #include "ns3/pcap-file.h"
 
 #include "./model/strict-priority-queue.cc"
-
+#include "ns3/drop-tail-queue.h"
 
 
 using namespace ns3;
@@ -37,29 +37,20 @@ main ()
     u_int32_t PriorityA = 0;
     u_int32_t PriorityB = 1;
 
-    uint16_t node0PortA = 9000;     // high priority source port
-    uint16_t node0PortB = 9500;     // low priority source port
-    uint16_t node1Port = 8000;     // Destination port
-    uint32_t tcp_adu_size = 946;
+    uint16_t node0PortA = 4001;     // high priority source port
+    uint16_t node0PortB = 4002;     // low priority source port
+    uint16_t node1PortA = 5001;     // Destination port
+    uint16_t node1PortB = 5002;     // Destination port
+    // uint32_t tcp_adu_size = 100;
 
     // uint32_t DEFAULT_DATA_BYTES = 1073741824;  // 0.1
     double DEFAULT_START_TIME = 0.0;
-    double DEFAULT_END_TIME = 10.0;
+    double DEFAULT_END_TIME = 42.0;
 
-    double appAStartTime = DEFAULT_START_TIME + 1.0;      // start later than B
-    double appAEndTime = DEFAULT_END_TIME;
+    double appAStartTime = DEFAULT_START_TIME + 12.0;      // start later than B A: 12-30, B: 0-40
+    double appAEndTime = DEFAULT_END_TIME - 12.0;
     double appBStartTime = DEFAULT_START_TIME;
-    double appBEndTime = DEFAULT_END_TIME;
-
-    //uint32_t DEFAULT_QUEUE_SIZE = 655350000;
-
-    // TODO: allow setting by config file
-
-    // Time::SetResolution(Time::NS);
-    // LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO);
-    // LogComponentEnable("UdpEchoServerApplication", LOG_LEVEL_INFO);
-    //LogComponentEnable("BulkSendApplication", LOG_LEVEL_INFO);
-
+    double appBEndTime = DEFAULT_END_TIME - 2;
 
     NodeContainer nodes;
     nodes.Create(3);
@@ -96,21 +87,12 @@ main ()
     Ipv4InterfaceContainer interface1 = address.Assign(devices1);
     address.SetBase("10.1.2.0", "255.255.255.0");
     Ipv4InterfaceContainer interface2 = address.Assign(devices2);
-    
-    // // TODO: delete.  Print IP address
-    std::cout << "Node 1 IP address: " << interface1.GetAddress(0) << std::endl;
-    std::cout << "Node 2 IP address: " << interface1.GetAddress(1) << std::endl;
-    std::cout << "Node 2 IP address: " << interface2.GetAddress(0) << std::endl;
-    std::cout << "Node 3 IP address: " << interface2.GetAddress(1) << std::endl;
 
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
-    // Create applications
-
     // Create applciation A on node 0
-    InetSocketAddress destIpPort(interface2.GetAddress(1), node1Port);
+    InetSocketAddress destIpPort(interface2.GetAddress(1), node1PortA);
     BulkSendHelper appA("ns3::TcpSocketFactory", destIpPort);
-    // appA.SetAttribute("PacketSize", UintegerValue(tcp_adu_size));
     appA.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
     appA.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortA)));
     ApplicationContainer appContA = appA.Install(nodes.Get(0));
@@ -118,9 +100,8 @@ main ()
     appContA.Stop(Seconds(appAEndTime)); 
 
     // Create applciation B on node 0
-    InetSocketAddress destIpPort2(interface2.GetAddress(1), 7000);    //TODO: test
+    InetSocketAddress destIpPort2(interface2.GetAddress(1), node1PortB);   
     BulkSendHelper appB("ns3::TcpSocketFactory", destIpPort2);
-    // appB.SetAttribute("PacketSize", UintegerValue(tcp_adu_size));
     appB.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
     appB.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortB)));
     ApplicationContainer appContB = appB.Install(nodes.Get(0));
@@ -129,22 +110,19 @@ main ()
 
     // Create a packet sinkc application A and install it on node1
     PacketSinkHelper sink("ns3::TcpSocketFactory",
-                         InetSocketAddress (Ipv4Address::GetAny(), node1Port));
+                         InetSocketAddress (Ipv4Address::GetAny(), node1PortA));
     ApplicationContainer sinkAppContA = sink.Install(nodes.Get(2));
     sinkAppContA.Start(Seconds(DEFAULT_START_TIME));
     sinkAppContA.Stop(Seconds(DEFAULT_END_TIME));
 
-
-    // TODO: test sink 2
-    uint16_t node1Port2 = 7000;     // Destination port
-        // Create a packet sinkc application A and install it on node1
+    // Create a packet sinkc application A and install it on node1
     PacketSinkHelper sink2("ns3::TcpSocketFactory",
-                         InetSocketAddress (Ipv4Address::GetAny(), node1Port2));
+                         InetSocketAddress (Ipv4Address::GetAny(), node1PortB));
     ApplicationContainer sinkAppContB = sink2.Install(nodes.Get(2));
     sinkAppContB.Start(Seconds(DEFAULT_START_TIME));
     sinkAppContB.Stop(Seconds(DEFAULT_END_TIME));
 
-    p2p.EnablePcapAll("dvc");
+    p2p.EnablePcapAll("dvc", true);
 
     Simulator::Run();
     Simulator::Destroy();

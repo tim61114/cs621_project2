@@ -12,9 +12,9 @@ class DiffServ : public Queue<Packet> {
         // std::vector<TrafficClass*> q_class;
 
         bool DoEnqueue(Ptr<Packet> p) {
-            printf("[DiffServ] DoEnqueue queue len %ld\n", q_class.size());
+            //printf("[DiffServ] DoEnqueue queue len %ld\n", q_class.size());
             uint32_t index = Classify(p);
-            printf("[DiffServ] DoEnqueue class index %d\n", index);    
+            //printf("[DiffServ] DoEnqueue:\tclass index %d\n", index);    
             return q_class[index]->Enqueue(p);
         }
 
@@ -30,19 +30,16 @@ class DiffServ : public Queue<Packet> {
             return 0; // TODO: ???
         }
 
+    protected:
+        std::vector<TrafficClass*> q_class; 
+
     public:
-        std::vector<TrafficClass*> q_class; // TODO: change to protected
-        
         virtual Ptr<Packet> Schedule() = 0;
 
         virtual uint32_t Classify(Ptr<Packet> p) = 0;
-        // uint32_t Classify(Ptr<Packet> p){
-        //     printf("[DiffServ] Classify\n");
-        //     return -1;
-        // };
 
         bool Enqueue(Ptr<Packet> p) override {
-            printf("[DiffServ] Enqueue\n");
+            //printf("[DiffServ] Enqueue\n");
             return DoEnqueue(p);
         }
 

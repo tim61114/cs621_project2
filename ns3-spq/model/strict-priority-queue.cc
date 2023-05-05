@@ -5,7 +5,6 @@
 #include "ns3/type-id.h"
 #include "../../src/lib/filter.h"
 #include "../../src/lib/diff-serv.cc"
-//#include "../../src/lib/filter-element/source-port-filter-element.cc"
 #include "../../src/lib/filter-element/filter-element.h"
 #include "../../src/lib/traffic-class.h"
 
@@ -142,7 +141,7 @@ class StrictPriorityQueue : public DiffServ {
             // sort the List by priority in ascending order
             putHighPriorityFirst();
 
-            printf("[spq] intit ports: %d %d\n", m_firstPort, m_secondPort);
+            //printf("[spq] intit ports: %d %d\n", m_firstPort, m_secondPort);
             // create first TrafficClass
             SourcePortNumberFilter* sourcePortFilter1 = new SourcePortNumberFilter(m_firstPort);
             // Create Filter
@@ -164,7 +163,7 @@ class StrictPriorityQueue : public DiffServ {
             q_class.push_back(tc1);
             q_class.push_back(tc2);
 
-            printf("[spq] init: q_class size : %ld\n", q_class.size());
+            //printf("[spq] init: q_class size : %ld\n", q_class.size());
         }
 
     public: 
@@ -207,17 +206,9 @@ class StrictPriorityQueue : public DiffServ {
 
         // uint32_t is priority, uint16_t is port number
         StrictPriorityQueue() {
-            printf("Create Strict Priority Queue (Constructor)\n");
+            //printf("Create Strict Priority Queue (Constructor)\n");
         }
 
-        // TODO: delete! 
-        void setParameters() {
-            this->m_firstPort = 8000;
-            this->m_firstPriority = 0;
-            this->m_secondPort = 9500;
-            this->m_secondPriority = 1;
-            this->m_queueNumber = 2;
-        }
 
         // return the index of traffic class
         uint32_t Classify(Ptr<Packet> p) override{
@@ -229,7 +220,7 @@ class StrictPriorityQueue : public DiffServ {
                 m_isInitialized = true;
             } 
 
-            uint32_t classIndex = 0;
+            uint32_t classIndex = 1;
 
             for (uint32_t i = 0; i < q_class.size(); i++) {
                 if (q_class[i]->match(p)) {
@@ -239,8 +230,8 @@ class StrictPriorityQueue : public DiffServ {
                     break;
                 }
             }
-     
-            printf("[SPQ] Classify: ClassIndex: %d\n", classIndex);
+            
+            //printf("[SPQ] Classify: ClassIndex: %d\n", classIndex);
             return classIndex;
         }
 

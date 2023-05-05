@@ -17,9 +17,8 @@ class SourcePortNumberFilter : public FilterElement {
         }
 
         bool match(Ptr<Packet> myPacket) override {
-            printf("[match]filter source port: %d  \n", this->sourcePortNumber);
             Ptr<Packet> packetReplica = myPacket->Copy();
-            printf("Enter source IP filter.\n"); 
+ 
             // remove ppp header
             PppHeader ppp;
             packetReplica->RemoveHeader(ppp);
@@ -39,7 +38,10 @@ class SourcePortNumberFilter : public FilterElement {
                 packetReplica->RemoveHeader(udpHeader);
                 packetSourcePort = udpHeader.GetSourcePort();
             }
-            printf("filter source port: %d    Packet source port: %d\n", this->sourcePortNumber, packetSourcePort);
+            // if (this->sourcePortNumber == 4001) {
+            //     printf("filter source port: %d    Packet source port: %d\n", this->sourcePortNumber, packetSourcePort);
+            // }
+            
             return packetSourcePort == this->sourcePortNumber;
         }
 
