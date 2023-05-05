@@ -4,18 +4,21 @@
 // n0 -------------- r1 -------------- n1
 //    point-to-point    point-to-point
 //
+
+#include <cstdint>
+#include <utility>
+
 #include "ns3/log.h"
 #include "ns3/applications-module.h"
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
+#include "ns3/pcap-file-wrapper.h"
+#include "ns3/pcap-file.h"
 
 #include "./model/strict-priority-queue.cc"
 
-
-#include <cstdint>
-#include <utility>
 
 
 using namespace ns3;
@@ -41,9 +44,9 @@ main ()
 
     // uint32_t DEFAULT_DATA_BYTES = 1073741824;  // 0.1
     double DEFAULT_START_TIME = 0.0;
-    double DEFAULT_END_TIME = 100000000.0;
+    double DEFAULT_END_TIME = 10.0;
 
-    double appAStartTime = DEFAULT_START_TIME + 10000000.0;      // start later than B
+    double appAStartTime = DEFAULT_START_TIME + 1.0;      // start later than B
     double appAEndTime = DEFAULT_END_TIME;
     double appBStartTime = DEFAULT_START_TIME;
     double appBEndTime = DEFAULT_END_TIME;
@@ -52,25 +55,23 @@ main ()
 
     // TODO: allow setting by config file
 
-    Time::SetResolution(Time::NS);
+    // Time::SetResolution(Time::NS);
     // LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO);
     // LogComponentEnable("UdpEchoServerApplication", LOG_LEVEL_INFO);
+    //LogComponentEnable("BulkSendApplication", LOG_LEVEL_INFO);
+
 
     NodeContainer nodes;
     nodes.Create(3);
 
     PointToPointHelper p2p;
     p2p.SetDeviceAttribute("DataRate", StringValue("40Mbps"));
+    p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices1 = p2p.Install(nodes.Get(0), nodes.Get(1));
 
     p2p.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
+    p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices2 = p2p.Install(nodes.Get(1), nodes.Get(2));
-
-    // set spq to R1
-    // Ptr<StrictPriorityQueue> spqR1 = CreateObject<StrictPriorityQueue>(queueNumber, priorityPortList);   
-    // //TODO: set up the queue, traffic class ? filter?
-    // Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
-    // devR1->SetQueue(spqR1);
 
     ObjectFactory m_spqFactory;
     m_spqFactory.SetTypeId("StrictPriorityQueue");
@@ -80,6 +81,7 @@ main ()
     m_spqFactory.Set("SecondPriority", UintegerValue(PriorityB));
     m_spqFactory.Set("SecondPort", UintegerValue(node0PortB));
 
+    // Install SPQ on router1
     Ptr<StrictPriorityQueue> spq = m_spqFactory.Create<StrictPriorityQueue>();
     Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
     devR1->SetQueue(spq);
@@ -105,35 +107,25 @@ main ()
 
     // Create applications
 
-    
-    Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(tcp_adu_size));
-    // set destination ip and port
-    AddressValue node1Address(InetSocketAddress(interface2.GetAddress(1), node1Port));  //receiver node1's address
-    BulkSendHelper BulkSendHelper ("ns3::TcpSocketFactory", Address());
-    Ipv4Address node0IP =  interface1.GetAddress(0);
+    // Create applciation A on node 0
+    InetSocketAddress destIpPort(interface2.GetAddress(1), node1Port);
+    BulkSendHelper appA("ns3::TcpSocketFactory", destIpPort);
+    // appA.SetAttribute("PacketSize", UintegerValue(tcp_adu_size));
+    appA.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
+    appA.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortA)));
+    ApplicationContainer appContA = appA.Install(nodes.Get(0));
+    appContA.Start(Seconds(appAStartTime));  
+    appContA.Stop(Seconds(appAEndTime)); 
 
-    // configure source ip and port for application A
-    ApplicationContainer appContA = BulkSendHelper.Install(nodes.Get(0));
-    Ptr<BulkSendApplication> bulkSendApplicationA = DynamicCast<BulkSendApplication>(appContA.Get(0));
-    AddressValue node0AddressA(InetSocketAddress(node0IP, node0PortA));
-    bulkSendApplicationA->SetAttribute("Local", node0AddressA);
-    
-    appContA.Start(Seconds(appAStartTime));
-    appContA.Stop(Seconds(appAEndTime));
-    // bulkSendApplicationA->SetStartTime(Seconds(appAStartTime));
-    // bulkSendApplicationA->SetStopTime(Seconds(appAEndTime));
-
-
-    // Create applciation B and install it on node0
-    ApplicationContainer appContB = BulkSendHelper.Install(nodes.Get(0));
-    Ptr<BulkSendApplication> bulkSendApplicationB = DynamicCast<BulkSendApplication>(appContB.Get(0));
-    AddressValue node0AddressB(InetSocketAddress(node0IP, node0PortB));     // same address with A, diff port
-    bulkSendApplicationB->SetAttribute("Local", node0AddressB);
-    
-    appContA.Start(Seconds(appBStartTime));
-    appContA.Stop(Seconds(appBEndTime));
-    // bulkSendApplicationB->SetStartTime(Seconds(appBStartTime));
-    // bulkSendApplicationB->SetStopTime(Seconds(appBEndTime));
+    // Create applciation B on node 0
+    InetSocketAddress destIpPort2(interface2.GetAddress(1), 7000);    //TODO: test
+    BulkSendHelper appB("ns3::TcpSocketFactory", destIpPort2);
+    // appB.SetAttribute("PacketSize", UintegerValue(tcp_adu_size));
+    appB.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
+    appB.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortB)));
+    ApplicationContainer appContB = appB.Install(nodes.Get(0));
+    appContB.Start(Seconds(appBStartTime));  
+    appContB.Stop(Seconds(appBEndTime));  
 
     // Create a packet sinkc application A and install it on node1
     PacketSinkHelper sink("ns3::TcpSocketFactory",
@@ -142,6 +134,17 @@ main ()
     sinkAppContA.Start(Seconds(DEFAULT_START_TIME));
     sinkAppContA.Stop(Seconds(DEFAULT_END_TIME));
 
+
+    // TODO: test sink 2
+    uint16_t node1Port2 = 7000;     // Destination port
+        // Create a packet sinkc application A and install it on node1
+    PacketSinkHelper sink2("ns3::TcpSocketFactory",
+                         InetSocketAddress (Ipv4Address::GetAny(), node1Port2));
+    ApplicationContainer sinkAppContB = sink2.Install(nodes.Get(2));
+    sinkAppContB.Start(Seconds(DEFAULT_START_TIME));
+    sinkAppContB.Stop(Seconds(DEFAULT_END_TIME));
+
+    p2p.EnablePcapAll("dvc");
 
     Simulator::Run();
     Simulator::Destroy();

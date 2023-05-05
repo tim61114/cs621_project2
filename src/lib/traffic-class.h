@@ -33,12 +33,15 @@ class TrafficClass {
 
         // return true if queue is not full and matches all filters
         bool Enqueue(Ptr<Packet> p) {
-            if (isFull() || !match(p)) {
+            printf("Enter traffic class enqueue()\n");
+            printf("isFull %d    match()  %d\n", isFull(), match(p));
+            if (isFull()) {
                 return false;
             }
 
             m_queue.push(p);
             packets++;
+            printf("[TrafficClass]Enqueue: current queue len %d\n", packets);
             return true;
         };
 

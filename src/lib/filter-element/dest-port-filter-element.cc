@@ -2,6 +2,7 @@
 #include "ns3/ipv4-header.h"
 #include "ns3/tcp-header.h"
 #include "ns3/udp-header.h"
+#include "ns3/ppp-header.h"
 
 using namespace ns3;
 
@@ -18,6 +19,10 @@ class DestPortNumberFilter : public FilterElement {
         bool match(Ptr<Packet> myPacket) override {
             Ptr<Packet> packetReplica = myPacket->Copy();
             
+            // remove ppp header
+            PppHeader ppp;
+            packetReplica->RemoveHeader(ppp);
+
             // remove ipv4 header
             Ipv4Header ipHeader;
             packetReplica->RemoveHeader(ipHeader);

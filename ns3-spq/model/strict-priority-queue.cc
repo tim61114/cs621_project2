@@ -5,7 +5,7 @@
 #include "ns3/type-id.h"
 #include "../../src/lib/filter.h"
 #include "../../src/lib/diff-serv.cc"
-#include "../../src/lib/filter-element/source-port-filter-element.cc"
+//#include "../../src/lib/filter-element/source-port-filter-element.cc"
 #include "../../src/lib/filter-element/filter-element.h"
 #include "../../src/lib/traffic-class.h"
 
@@ -109,7 +109,7 @@ class StrictPriorityQueue : public DiffServ {
         uint32_t m_secondPriority;
         uint16_t m_secondPort;
 
-        bool m_isInitialized;
+        bool m_isInitialized = false;
 
 
         // return the next packet
@@ -153,7 +153,7 @@ class StrictPriorityQueue : public DiffServ {
             tc1->filters.push_back(filter1);
             
             // create second TrafficClass
-            SourcePortNumberFilter* sourcePortFilter2 = new SourcePortNumberFilter(m_firstPort);
+            SourcePortNumberFilter* sourcePortFilter2 = new SourcePortNumberFilter(m_secondPort);
             Filter* filter2 = new Filter();
             filter2->elements.push_back(sourcePortFilter2);  
             TrafficClass* tc2 = new TrafficClass();
@@ -163,7 +163,7 @@ class StrictPriorityQueue : public DiffServ {
             q_class.push_back(tc1);
             q_class.push_back(tc2);
 
-            printf("q_class size : %ld\n", q_class.size());
+            printf("[spq] init: q_class size : %ld\n", q_class.size());
         }
 
     public: 
@@ -207,31 +207,40 @@ class StrictPriorityQueue : public DiffServ {
         // uint32_t is priority, uint16_t is port number
         StrictPriorityQueue() {
             printf("Create Strict Priority Queue (Constructor)\n");
-        }
-
-        // return the index of traffic class
-        uint32_t Classify(Ptr<Packet> p) {
             if (m_isInitialized == false)
-            {
+            {   
+                // setParameters();
                 InitializeTrafficClass();
                 m_isInitialized = true;
             } 
+        }
 
+        // TODO: delete! 
+        void setParameters() {
+            this->m_firstPort = 8000;
+            this->m_firstPriority = 0;
+            this->m_secondPort = 9500;
+            this->m_secondPriority = 1;
+            this->m_queueNumber = 2;
+        }
+
+        // return the index of traffic class
+        uint32_t Classify(Ptr<Packet> p) override{
             // NS_LOG_FUNCTION(this << p);
-            PppHeader ppp;
-            p->RemoveHeader(ppp);
+  
 
-            uint32_t classIndex;
+            uint32_t classIndex = 0;
 
             for (uint32_t i = 0; i < q_class.size(); i++) {
                 if (q_class[i]->match(p)) {
                     // NS_LOG_INFO("\tclassifier: queue " << i << " matches." );
                     classIndex = i;
+                    
                     break;
                 }
             }
-            p->AddHeader(ppp);
-            printf("ClassIndex: %d\n", classIndex);
+     
+            printf("[SPQ] Classify: ClassIndex: %d\n", classIndex);
             return classIndex;
         }
 

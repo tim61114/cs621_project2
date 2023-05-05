@@ -2,6 +2,7 @@
 #include "ns3/ipv4-header.h"
 #include "ns3/tcp-header.h"
 #include "ns3/udp-header.h"
+#include "ns3/ppp-header.h"
 
 using namespace ns3;
 
@@ -16,8 +17,13 @@ class SourcePortNumberFilter : public FilterElement {
         }
 
         bool match(Ptr<Packet> myPacket) override {
+            printf("[match]filter source port: %d  \n", this->sourcePortNumber);
             Ptr<Packet> packetReplica = myPacket->Copy();
-            
+            printf("Enter source IP filter.\n"); 
+            // remove ppp header
+            PppHeader ppp;
+            packetReplica->RemoveHeader(ppp);
+
             // remove ipv4 header
             Ipv4Header ipHeader;
             packetReplica->RemoveHeader(ipHeader);
@@ -33,7 +39,11 @@ class SourcePortNumberFilter : public FilterElement {
                 packetReplica->RemoveHeader(udpHeader);
                 packetSourcePort = udpHeader.GetSourcePort();
             }
-
+            printf("filter source port: %d    Packet source port: %d\n", this->sourcePortNumber, packetSourcePort);
             return packetSourcePort == this->sourcePortNumber;
+        }
+
+        uint16_t getSourcePortNumber() {
+            return this->sourcePortNumber;
         }
 };
