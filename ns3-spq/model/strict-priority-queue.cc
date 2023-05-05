@@ -142,6 +142,7 @@ class StrictPriorityQueue : public DiffServ {
             // sort the List by priority in ascending order
             putHighPriorityFirst();
 
+            printf("[spq] intit ports: %d %d\n", m_firstPort, m_secondPort);
             // create first TrafficClass
             SourcePortNumberFilter* sourcePortFilter1 = new SourcePortNumberFilter(m_firstPort);
             // Create Filter
@@ -207,12 +208,6 @@ class StrictPriorityQueue : public DiffServ {
         // uint32_t is priority, uint16_t is port number
         StrictPriorityQueue() {
             printf("Create Strict Priority Queue (Constructor)\n");
-            if (m_isInitialized == false)
-            {   
-                // setParameters();
-                InitializeTrafficClass();
-                m_isInitialized = true;
-            } 
         }
 
         // TODO: delete! 
@@ -227,7 +222,12 @@ class StrictPriorityQueue : public DiffServ {
         // return the index of traffic class
         uint32_t Classify(Ptr<Packet> p) override{
             // NS_LOG_FUNCTION(this << p);
-  
+            if (m_isInitialized == false)
+            {   
+                // setParameters();
+                InitializeTrafficClass();
+                m_isInitialized = true;
+            } 
 
             uint32_t classIndex = 0;
 
@@ -245,7 +245,7 @@ class StrictPriorityQueue : public DiffServ {
         }
 
         // assume vector of traffic class is sorted by priority from top to low
-        Ptr<Packet> Schedule() {
+        Ptr<Packet> Schedule() override{
             for (TrafficClass *tc : q_class) {
                 if (tc->getPacketCount() > 0) {
                     return tc->Dequeue();
