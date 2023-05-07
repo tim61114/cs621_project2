@@ -41,4 +41,8 @@ class DestPortNumberFilter : public FilterElement {
 
             return packetDestPort == this->destPortNumber;
         }
+
+        u_int32_t getDestPort() {
+            return this->destPortNumber;
+        }
 };

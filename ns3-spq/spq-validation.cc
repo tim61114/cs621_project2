@@ -49,7 +49,7 @@ int main ()
   double DEFAULT_END_TIME = 40.0;
 
   double appAStartTime = DEFAULT_START_TIME + 12.0;      // start later than B A: 12-30, B: 0-40
-  double appAEndTime = DEFAULT_END_TIME -10.0;
+  double appAEndTime = DEFAULT_END_TIME - 10.0;
   double appBStartTime = DEFAULT_START_TIME;
   double appBEndTime = DEFAULT_END_TIME ;
 
@@ -77,7 +77,6 @@ int main ()
     tc->filters.push_back(filter1);
     tc_vector.push_back(tc);
   }
-
 
   NodeContainer nodes;
   nodes.Create(3);
