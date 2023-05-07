@@ -70,6 +70,9 @@ int main ()
     // Create TrafficClass
     TrafficClass* tc = new TrafficClass();
     tc->setPriorityLevel(priority_port[i].first);
+    if (priority_port[i].first == 1) {
+      tc->setDefault(true);   // set priority 1 queue as default
+    }
     tc->setMaxPackets(queueMaxPackets);
     tc->filters.push_back(filter1);
     tc_vector.push_back(tc);
@@ -92,11 +95,6 @@ int main ()
   ObjectFactory m_spqFactory;
   m_spqFactory.SetTypeId("StrictPriorityQueue");
   m_spqFactory.Set("QueueNumber", UintegerValue(queueNumber));
-  // m_spqFactory.Set("FirstPriority", UintegerValue(PriorityA));
-  // m_spqFactory.Set("FirstPort", UintegerValue(node1PortA));
-  // m_spqFactory.Set("SecondPriority", UintegerValue(PriorityB));
-  // m_spqFactory.Set("SecondPort", UintegerValue(node1PortB));
-    
 
   // Install SPQ on router1
   Ptr<StrictPriorityQueue> spq = m_spqFactory.Create<StrictPriorityQueue>();
