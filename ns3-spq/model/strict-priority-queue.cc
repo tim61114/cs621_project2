@@ -143,19 +143,21 @@ class StrictPriorityQueue : public DiffServ {
 
             //printf("[spq] intit ports: %d %d\n", m_firstPort, m_secondPort);
             // create first TrafficClass
-            SourcePortNumberFilter* sourcePortFilter1 = new SourcePortNumberFilter(m_firstPort);
+            //SourcePortNumberFilter* sourcePortFilter1 = new SourcePortNumberFilter(m_firstPort);
+            DestPortNumberFilter* destPortFilter1 = new DestPortNumberFilter(m_firstPort);
             // Create Filter
             Filter* filter1 = new Filter();
-            filter1->elements.push_back(sourcePortFilter1);  
+            filter1->elements.push_back(destPortFilter1);  
             // Create TrafficClass
             TrafficClass* tc1 = new TrafficClass();
             tc1->setPriorityLevel(m_firstPriority);
             tc1->filters.push_back(filter1);
             
             // create second TrafficClass
-            SourcePortNumberFilter* sourcePortFilter2 = new SourcePortNumberFilter(m_secondPort);
+            //SourcePortNumberFilter* sourcePortFilter2 = new SourcePortNumberFilter(m_secondPort);
+            DestPortNumberFilter* destPortFilter2 = new DestPortNumberFilter(m_secondPort);
             Filter* filter2 = new Filter();
-            filter2->elements.push_back(sourcePortFilter2);  
+            filter2->elements.push_back(destPortFilter2);  
             TrafficClass* tc2 = new TrafficClass();
             tc2->setPriorityLevel(m_firstPriority);
             tc2->filters.push_back(filter2);

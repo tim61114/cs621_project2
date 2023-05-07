@@ -37,8 +37,8 @@ main ()
     u_int32_t PriorityA = 0;
     u_int32_t PriorityB = 1;
 
-    uint16_t node0PortA = 4001;     // high priority source port
-    uint16_t node0PortB = 4002;     // low priority source port
+    // uint16_t node0PortA = 4001;     // high priority source port
+    // uint16_t node0PortB = 4002;     // low priority source port
     uint16_t node1PortA = 5001;     // Destination port
     uint16_t node1PortB = 5002;     // Destination port
     // uint32_t tcp_adu_size = 100;
@@ -48,9 +48,9 @@ main ()
     double DEFAULT_END_TIME = 42.0;
 
     double appAStartTime = DEFAULT_START_TIME + 12.0;      // start later than B A: 12-30, B: 0-40
-    double appAEndTime = DEFAULT_END_TIME - 12.0;
+    double appAEndTime = DEFAULT_END_TIME -12.0;
     double appBStartTime = DEFAULT_START_TIME;
-    double appBEndTime = DEFAULT_END_TIME - 2;
+    double appBEndTime = DEFAULT_END_TIME ;
 
     NodeContainer nodes;
     nodes.Create(3);
@@ -68,9 +68,9 @@ main ()
     m_spqFactory.SetTypeId("StrictPriorityQueue");
     m_spqFactory.Set("QueueNumber", UintegerValue(queueNumber));
     m_spqFactory.Set("FirstPriority", UintegerValue(PriorityA));
-    m_spqFactory.Set("FirstPort", UintegerValue(node0PortA));
+    m_spqFactory.Set("FirstPort", UintegerValue(node1PortA));
     m_spqFactory.Set("SecondPriority", UintegerValue(PriorityB));
-    m_spqFactory.Set("SecondPort", UintegerValue(node0PortB));
+    m_spqFactory.Set("SecondPort", UintegerValue(node1PortB));
 
     // Install SPQ on router1
     Ptr<StrictPriorityQueue> spq = m_spqFactory.Create<StrictPriorityQueue>();
@@ -91,36 +91,71 @@ main ()
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
     // Create applciation A on node 0
-    InetSocketAddress destIpPort(interface2.GetAddress(1), node1PortA);
-    BulkSendHelper appA("ns3::TcpSocketFactory", destIpPort);
-    appA.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
-    appA.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortA)));
-    ApplicationContainer appContA = appA.Install(nodes.Get(0));
+    UdpClientHelper client1 (interface2.GetAddress(1), node1PortA);
+    client1.SetAttribute("Interval", TimeValue(Seconds(0.0003)));
+    client1.SetAttribute("PacketSize", UintegerValue(512));
+    client1.SetAttribute("MaxPackets", UintegerValue(0));
+    ApplicationContainer appContA = client1.Install(nodes.Get(0));
     appContA.Start(Seconds(appAStartTime));  
     appContA.Stop(Seconds(appAEndTime)); 
 
+
     // Create applciation B on node 0
-    InetSocketAddress destIpPort2(interface2.GetAddress(1), node1PortB);   
-    BulkSendHelper appB("ns3::TcpSocketFactory", destIpPort2);
-    appB.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
-    appB.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortB)));
-    ApplicationContainer appContB = appB.Install(nodes.Get(0));
+    UdpClientHelper client2 (interface2.GetAddress(1), node1PortB);
+    client2.SetAttribute("Interval", TimeValue(Seconds(0.0003)));
+    client2.SetAttribute("PacketSize", UintegerValue(512));
+    client2.SetAttribute("MaxPackets", UintegerValue(0));
+    ApplicationContainer appContB = client2.Install(nodes.Get(0));
     appContB.Start(Seconds(appBStartTime));  
     appContB.Stop(Seconds(appBEndTime));  
 
-    // Create a packet sinkc application A and install it on node1
-    PacketSinkHelper sink("ns3::TcpSocketFactory",
-                         InetSocketAddress (Ipv4Address::GetAny(), node1PortA));
-    ApplicationContainer sinkAppContA = sink.Install(nodes.Get(2));
-    sinkAppContA.Start(Seconds(DEFAULT_START_TIME));
-    sinkAppContA.Stop(Seconds(DEFAULT_END_TIME));
+    // Create the first UdpServerHelper instance
+    UdpServerHelper server1 (node1PortA);
+    ApplicationContainer serverApps1 = server1.Install (nodes.Get(2));
+
+    // Create the second UdpServerHelper instance
+    UdpServerHelper server2 (node1PortB);
+    ApplicationContainer serverApps2 = server2.Install (nodes.Get(2));
+
+    // Start the server applications
+    serverApps1.Start (Seconds(DEFAULT_START_TIME));
+    serverApps1.Stop (Seconds(DEFAULT_END_TIME));
+    serverApps2.Start (Seconds(DEFAULT_START_TIME));
+    serverApps2.Stop (Seconds(DEFAULT_END_TIME));
+
+
+
+    // // Create applciation A on node 0
+    // InetSocketAddress destIpPort(interface2.GetAddress(1), node1PortA);
+    // BulkSendHelper appA("ns3::TcpSocketFactory", destIpPort);
+    // appA.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
+    // appA.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortA)));
+    // ApplicationContainer appContA = appA.Install(nodes.Get(0));
+    // appContA.Start(Seconds(appAStartTime));  
+    // appContA.Stop(Seconds(appAEndTime)); 
+
+    // 
+    // InetSocketAddress destIpPort2(interface2.GetAddress(1), node1PortB);   
+    // BulkSendHelper appB("ns3::TcpSocketFactory", destIpPort2);
+    // appB.SetAttribute("MaxBytes", UintegerValue(0));  // Send unlimited packets
+    // appB.SetAttribute("Local", AddressValue(InetSocketAddress(Ipv4Address::GetAny(), node0PortB)));
+    // ApplicationContainer appContB = appB.Install(nodes.Get(0));
+    // appContB.Start(Seconds(appBStartTime));  
+    // appContB.Stop(Seconds(appBEndTime));  
 
     // Create a packet sinkc application A and install it on node1
-    PacketSinkHelper sink2("ns3::TcpSocketFactory",
-                         InetSocketAddress (Ipv4Address::GetAny(), node1PortB));
-    ApplicationContainer sinkAppContB = sink2.Install(nodes.Get(2));
-    sinkAppContB.Start(Seconds(DEFAULT_START_TIME));
-    sinkAppContB.Stop(Seconds(DEFAULT_END_TIME));
+    // PacketSinkHelper sink("ns3::UdpSocketFactory",
+    //                      InetSocketAddress (Ipv4Address::GetAny(), node1PortA));
+    // ApplicationContainer sinkAppContA = sink.Install(nodes.Get(2));
+    // sinkAppContA.Start(Seconds(DEFAULT_START_TIME));
+    // sinkAppContA.Stop(Seconds(DEFAULT_END_TIME));
+
+    // // Create a packet sinkc application A and install it on node1
+    // PacketSinkHelper sink2("ns3::UdpSocketFactory",
+    //                      InetSocketAddress (Ipv4Address::GetAny(), node1PortB));
+    // ApplicationContainer sinkAppContB = sink2.Install(nodes.Get(2));
+    // sinkAppContB.Start(Seconds(DEFAULT_START_TIME));
+    // sinkAppContB.Stop(Seconds(DEFAULT_END_TIME));
 
     p2p.EnablePcapAll("dvc", true);
 

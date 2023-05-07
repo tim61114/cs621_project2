@@ -3,7 +3,7 @@
 #include "traffic-class.h"
 #include "filter.h"
 #include "ns3/queue.h"
-#include "./filter-element/source-port-filter-element.cc"
+#include "./filter-element/dest-port-filter-element.cc"
 
 using namespace ns3;
 
