@@ -31,7 +31,7 @@ class DiffServ : public Queue<Packet> {
         }
 
     protected:
-        std::vector<TrafficClass*> q_class; 
+        std::vector<TrafficClass*> q_class;
 
     public:
         virtual Ptr<Packet> Schedule() = 0;

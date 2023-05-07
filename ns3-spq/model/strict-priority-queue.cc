@@ -1,4 +1,5 @@
 #include <utility>
+#include <vector>
 #include <cstdint>
 #include "ns3/log.h"
 #include "ns3/ppp-header.h"
@@ -109,7 +110,7 @@ class StrictPriorityQueue : public DiffServ {
         uint16_t m_secondPort;
 
         bool m_isInitialized = false;
-
+        std::vector<TrafficClass*> m_tc_vector;
 
         // return the next packet
         Ptr<Packet> DoPeek() {
@@ -123,50 +124,50 @@ class StrictPriorityQueue : public DiffServ {
             return nullptr;
         }
 
-        void putHighPriorityFirst() {
-            if (m_firstPriority > m_secondPriority) {
-                // switch priority
-                uint32_t temp1 = m_firstPriority;
-                m_firstPriority = m_secondPriority;
-                m_secondPriority = temp1;
+        // void putHighPriorityFirst() {
+        //     if (m_firstPriority > m_secondPriority) {
+        //         // switch priority
+        //         uint32_t temp1 = m_firstPriority;
+        //         m_firstPriority = m_secondPriority;
+        //         m_secondPriority = temp1;
                 
-                // switch source port
-                uint16_t temp2 = m_firstPort;
-                m_firstPort = m_secondPort;
-                m_secondPort = temp2;
-            }
-        }
+        //         // switch source port
+        //         uint16_t temp2 = m_firstPort;
+        //         m_firstPort = m_secondPort;
+        //         m_secondPort = temp2;
+        //     }
+        // }
 
-        void InitializeTrafficClass() {
-            // sort the List by priority in ascending order
-            putHighPriorityFirst();
+        // void InitializeTrafficClass() {
+        //     // sort the List by priority in ascending order
+        //     putHighPriorityFirst();
 
-            //printf("[spq] intit ports: %d %d\n", m_firstPort, m_secondPort);
-            // create first TrafficClass
-            //SourcePortNumberFilter* sourcePortFilter1 = new SourcePortNumberFilter(m_firstPort);
-            DestPortNumberFilter* destPortFilter1 = new DestPortNumberFilter(m_firstPort);
-            // Create Filter
-            Filter* filter1 = new Filter();
-            filter1->elements.push_back(destPortFilter1);  
-            // Create TrafficClass
-            TrafficClass* tc1 = new TrafficClass();
-            tc1->setPriorityLevel(m_firstPriority);
-            tc1->filters.push_back(filter1);
+        //     //printf("[spq] intit ports: %d %d\n", m_firstPort, m_secondPort);
+        //     // create first TrafficClass
+        //     //SourcePortNumberFilter* sourcePortFilter1 = new SourcePortNumberFilter(m_firstPort);
+        //     DestPortNumberFilter* destPortFilter1 = new DestPortNumberFilter(m_firstPort);
+        //     // Create Filter
+        //     Filter* filter1 = new Filter();
+        //     filter1->elements.push_back(destPortFilter1);  
+        //     // Create TrafficClass
+        //     TrafficClass* tc1 = new TrafficClass();
+        //     tc1->setPriorityLevel(m_firstPriority);
+        //     tc1->filters.push_back(filter1);
             
-            // create second TrafficClass
-            //SourcePortNumberFilter* sourcePortFilter2 = new SourcePortNumberFilter(m_secondPort);
-            DestPortNumberFilter* destPortFilter2 = new DestPortNumberFilter(m_secondPort);
-            Filter* filter2 = new Filter();
-            filter2->elements.push_back(destPortFilter2);  
-            TrafficClass* tc2 = new TrafficClass();
-            tc2->setPriorityLevel(m_firstPriority);
-            tc2->filters.push_back(filter2);
+        //     // create second TrafficClass
+        //     //SourcePortNumberFilter* sourcePortFilter2 = new SourcePortNumberFilter(m_secondPort);
+        //     DestPortNumberFilter* destPortFilter2 = new DestPortNumberFilter(m_secondPort);
+        //     Filter* filter2 = new Filter();
+        //     filter2->elements.push_back(destPortFilter2);  
+        //     TrafficClass* tc2 = new TrafficClass();
+        //     tc2->setPriorityLevel(m_firstPriority);
+        //     tc2->filters.push_back(filter2);
             
-            q_class.push_back(tc1);
-            q_class.push_back(tc2);
+        //     q_class.push_back(tc1);
+        //     q_class.push_back(tc2);
 
-            //printf("[spq] init: q_class size : %ld\n", q_class.size());
-        }
+        //     //printf("[spq] init: q_class size : %ld\n", q_class.size());
+        // }
 
     public: 
         static TypeId GetTypeId(void){
@@ -176,31 +177,31 @@ class StrictPriorityQueue : public DiffServ {
                     "Queue number.",
                     UintegerValue(2),
                     MakeUintegerAccessor(&StrictPriorityQueue::m_queueNumber),
-                    MakeUintegerChecker<uint32_t>())
+                    MakeUintegerChecker<uint32_t>());
 
-            .AddAttribute("FirstPriority",
-                    "First priority value.",
-                    UintegerValue(0),
-                    MakeUintegerAccessor(&StrictPriorityQueue::m_firstPriority),
-                    MakeUintegerChecker<uint32_t>())
+            // .AddAttribute("FirstPriority",
+            //         "First priority value.",
+            //         UintegerValue(0),
+            //         MakeUintegerAccessor(&StrictPriorityQueue::m_firstPriority),
+            //         MakeUintegerChecker<uint32_t>())
             
-            .AddAttribute("FirstPort",
-                    "First port value.",
-                    UintegerValue(65535),
-                    MakeUintegerAccessor(&StrictPriorityQueue::m_firstPort),
-                    MakeUintegerChecker<uint16_t>())
+            // .AddAttribute("FirstPort",
+            //         "First port value.",
+            //         UintegerValue(65535),
+            //         MakeUintegerAccessor(&StrictPriorityQueue::m_firstPort),
+            //         MakeUintegerChecker<uint16_t>())
             
-            .AddAttribute("SecondPriority",
-                    "Second priority value.",
-                    UintegerValue(1),
-                    MakeUintegerAccessor(&StrictPriorityQueue::m_secondPriority),
-                    MakeUintegerChecker<uint32_t>())
+            // .AddAttribute("SecondPriority",
+            //         "Second priority value.",
+            //         UintegerValue(1),
+            //         MakeUintegerAccessor(&StrictPriorityQueue::m_secondPriority),
+            //         MakeUintegerChecker<uint32_t>())
             
-            .AddAttribute("SecondPort",
-                    "Second port value.",
-                    UintegerValue(65534),
-                    MakeUintegerAccessor(&StrictPriorityQueue::m_secondPort),
-                    MakeUintegerChecker<uint16_t>());
+            // .AddAttribute("SecondPort",
+            //         "Second port value.",
+            //         UintegerValue(65534),
+            //         MakeUintegerAccessor(&StrictPriorityQueue::m_secondPort),
+            //         MakeUintegerChecker<uint16_t>());
             
             return tid;
         }
@@ -208,19 +209,19 @@ class StrictPriorityQueue : public DiffServ {
 
         // uint32_t is priority, uint16_t is port number
         StrictPriorityQueue() {
-            //printf("Create Strict Priority Queue (Constructor)\n");
+            
         }
 
 
         // return the index of traffic class
         uint32_t Classify(Ptr<Packet> p) override{
             // NS_LOG_FUNCTION(this << p);
-            if (m_isInitialized == false)
-            {   
-                // setParameters();
-                InitializeTrafficClass();
-                m_isInitialized = true;
-            } 
+            // if (m_isInitialized == false)
+            // {   
+            //     // setParameters();
+            //     InitializeTrafficClass();
+            //     m_isInitialized = true;
+            // } 
 
             uint32_t classIndex = 1;
 
@@ -245,6 +246,10 @@ class StrictPriorityQueue : public DiffServ {
                 }
             }
             return nullptr;
+        }
+
+        void setQ_Class(std::vector<TrafficClass*> q_class) {
+            this->q_class = q_class;
         }
 
 };
