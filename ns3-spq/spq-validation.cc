@@ -39,8 +39,7 @@ void parse(std::vector<std::pair<uint32_t, uint16_t>>& pairs, const std::string&
 
 int main (int argc, char *argv[]) 
 {   
-    
-    CommandLine cmd;
+    CommandLine cmd;  
 
     std::string filename;
 
@@ -66,12 +65,12 @@ int main (int argc, char *argv[])
     double DEFAULT_END_TIME = 40.0;
 
     double appAStartTime = DEFAULT_START_TIME + 12.0;      // start later than B A: 12-30, B: 0-40
-    double appAEndTime = DEFAULT_END_TIME -10.0;
+    double appAEndTime = DEFAULT_END_TIME - 10.0;
     double appBStartTime = DEFAULT_START_TIME;
     double appBEndTime = DEFAULT_END_TIME ;
 
 
-//    std::vector<std::pair<uint32_t, uint16_t>> priority_port(queueNumber);
+    std::vector<std::pair<uint32_t, uint16_t>> priority_port(queueNumber);
     priority_port[0].first = PriorityA; // TODO: read from config
     priority_port[0].second = node1PortA;
     priority_port[1].first = PriorityB;
@@ -87,11 +86,13 @@ int main (int argc, char *argv[])
         // Create TrafficClass
         TrafficClass* tc = new TrafficClass();
         tc->setPriorityLevel(priority_port[i].first);
+        if (priority_port[i].first == 1) {
+            tc->setDefault(true);   // set priority 1 queue as default
+        }
         tc->setMaxPackets(queueMaxPackets);
         tc->filters.push_back(filter1);
         tc_vector.push_back(tc);
     }
-
 
     NodeContainer nodes;
     nodes.Create(3);
@@ -109,11 +110,6 @@ int main (int argc, char *argv[])
     ObjectFactory m_spqFactory;
     m_spqFactory.SetTypeId("StrictPriorityQueue");
     m_spqFactory.Set("QueueNumber", UintegerValue(queueNumber));
-    // m_spqFactory.Set("FirstPriority", UintegerValue(PriorityA));
-    // m_spqFactory.Set("FirstPort", UintegerValue(node1PortA));
-    // m_spqFactory.Set("SecondPriority", UintegerValue(PriorityB));
-    // m_spqFactory.Set("SecondPort", UintegerValue(node1PortB));
-
 
     // Install SPQ on router1
     Ptr<StrictPriorityQueue> spq = m_spqFactory.Create<StrictPriorityQueue>();

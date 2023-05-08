@@ -10,95 +10,7 @@
 #include "../../src/lib/traffic-class.h"
 
 
-
-
-// // NS_LOG_COMPONENT_DEFINE("StrictPriorityQueue");
-
-// // Ptr<Packet> StrictPriorityQueue::DoPeek() {
-// //     Ptr<Packet> p;
-// //             for (TrafficClass *tc : q_class) {
-// //                 if (!tc->isEmpty()) {
-// //                     return tc->DoPeek();
-// //                 }
-// //             }
-// //             // NS_LOG_INFO("all queues empty");
-// //             return 0;
-// // }
-
-// // bool StrictPriorityQueue::compareByPriority(const std::pair<uint32_t, uint16_t>& pair1, 
-// //                                         const std::pair<uint32_t, uint16_t>& pair2) {
-// //     static bool res = pair1.first < pair2.first;
-// //     return res; 
-// // }
-
-
-// // void StrictPriorityQueue::InitializeTrafficClass(uint32_t queueNumber, 
-// //                         std::vector<std::pair<uint32_t, uint16_t>>& priorityPortList) {
-// //     // sort the List by priority in ascending order
-// //     std::sort(priorityPortList.begin(), priorityPortList.end(), compareByPriority);
-
-// //     // Create TrafficClasses and their filters
-// //     for (uint32_t i = 0; i < queueNumber; i++) {
-// //         uint32_t priorityLevel = priorityPortList[i].first;
-// //         uint16_t destPort = priorityPortList[i].second;
-                
-// //         TrafficClass* tc = new TrafficClass();
-// //         tc->setPriorityLevel(priorityLevel);
-// //         // DestPortNumberFilter destPortFilter(destPort);
-// //         // FilterElement *fe = &destPortFilter;
-// //         DestPortNumberFilter* destPortFilter = new DestPortNumberFilter(destPort);
-// //         Filter filter;
-// //         filter.elements.push_back(destPortFilter);
-// //         tc->filters.push_back(&filter);
-// //         q_class.push_back(tc);
-// //     } 
-
-// // }
-
-// // StrictPriorityQueue::StrictPriorityQueue(uint32_t queueNumber, 
-// //             std::vector<std::pair<uint32_t, uint16_t>>& priorityPortList) {
-// //             // InitializeTrafficClass(queueNumber, priorityPortList);
-// // }
-
-
-// StrictPriorityQueue::StrictPriorityQueue(uint32_t a) {
-//     printf("constructor");
-// }
-
-// // // return the index of traffic class
-// // uint32_t StrictPriorityQueue::Classify(Ptr<Packet> p) {
-// //     // NS_LOG_FUNCTION(this << p);
-// //     PppHeader ppp;
-// //     p->RemoveHeader(ppp);
-
-// //     uint32_t classIndex;
-// //     for (uint32_t i = 0; i < q_class.size(); i++) {
-// //         if (q_class[i]->match(p)) {
-// //             // NS_LOG_INFO("\tclassifier: queue " << i << " matches." );
-// //             classIndex = i;
-// //             break;
-// //         }
-// //     }
-
-// //     p->AddHeader(ppp);    
-// //     return classIndex;
-// // }
-
-
-// // // assume vector of traffic class is sorted by priority from top to low
-// // Ptr<Packet> StrictPriorityQueue::Schedule() {
-// //     for (TrafficClass *tc : q_class) {
-// //         if (tc->getPacketCount() > 0) {
-// //             return tc->Dequeue();
-// //         }
-// //     }
-// //     return nullptr;
-// // }
-
-
 using namespace ns3;
-
-
 
 class StrictPriorityQueue : public DiffServ {
     private:
@@ -120,54 +32,14 @@ class StrictPriorityQueue : public DiffServ {
                     return tc->DoPeek();
                 }
             }
-            // NS_LOG_INFO("all queues empty");
             return nullptr;
         }
 
-        // void putHighPriorityFirst() {
-        //     if (m_firstPriority > m_secondPriority) {
-        //         // switch priority
-        //         uint32_t temp1 = m_firstPriority;
-        //         m_firstPriority = m_secondPriority;
-        //         m_secondPriority = temp1;
-                
-        //         // switch source port
-        //         uint16_t temp2 = m_firstPort;
-        //         m_firstPort = m_secondPort;
-        //         m_secondPort = temp2;
-        //     }
-        // }
+        // comparater for TrafficClass by Priority
+        static bool CompareTCByPriority(TrafficClass* tc1, TrafficClass* tc2) {
+            return tc1->getPriorityLevel() < tc2->getPriorityLevel();
+        }
 
-        // void InitializeTrafficClass() {
-        //     // sort the List by priority in ascending order
-        //     putHighPriorityFirst();
-
-        //     //printf("[spq] intit ports: %d %d\n", m_firstPort, m_secondPort);
-        //     // create first TrafficClass
-        //     //SourcePortNumberFilter* sourcePortFilter1 = new SourcePortNumberFilter(m_firstPort);
-        //     DestPortNumberFilter* destPortFilter1 = new DestPortNumberFilter(m_firstPort);
-        //     // Create Filter
-        //     Filter* filter1 = new Filter();
-        //     filter1->elements.push_back(destPortFilter1);  
-        //     // Create TrafficClass
-        //     TrafficClass* tc1 = new TrafficClass();
-        //     tc1->setPriorityLevel(m_firstPriority);
-        //     tc1->filters.push_back(filter1);
-            
-        //     // create second TrafficClass
-        //     //SourcePortNumberFilter* sourcePortFilter2 = new SourcePortNumberFilter(m_secondPort);
-        //     DestPortNumberFilter* destPortFilter2 = new DestPortNumberFilter(m_secondPort);
-        //     Filter* filter2 = new Filter();
-        //     filter2->elements.push_back(destPortFilter2);  
-        //     TrafficClass* tc2 = new TrafficClass();
-        //     tc2->setPriorityLevel(m_firstPriority);
-        //     tc2->filters.push_back(filter2);
-            
-        //     q_class.push_back(tc1);
-        //     q_class.push_back(tc2);
-
-        //     //printf("[spq] init: q_class size : %ld\n", q_class.size());
-        // }
 
     public: 
         static TypeId GetTypeId(void){
@@ -178,36 +50,11 @@ class StrictPriorityQueue : public DiffServ {
                     UintegerValue(2),
                     MakeUintegerAccessor(&StrictPriorityQueue::m_queueNumber),
                     MakeUintegerChecker<uint32_t>());
-
-            // .AddAttribute("FirstPriority",
-            //         "First priority value.",
-            //         UintegerValue(0),
-            //         MakeUintegerAccessor(&StrictPriorityQueue::m_firstPriority),
-            //         MakeUintegerChecker<uint32_t>())
-            
-            // .AddAttribute("FirstPort",
-            //         "First port value.",
-            //         UintegerValue(65535),
-            //         MakeUintegerAccessor(&StrictPriorityQueue::m_firstPort),
-            //         MakeUintegerChecker<uint16_t>())
-            
-            // .AddAttribute("SecondPriority",
-            //         "Second priority value.",
-            //         UintegerValue(1),
-            //         MakeUintegerAccessor(&StrictPriorityQueue::m_secondPriority),
-            //         MakeUintegerChecker<uint32_t>())
-            
-            // .AddAttribute("SecondPort",
-            //         "Second port value.",
-            //         UintegerValue(65534),
-            //         MakeUintegerAccessor(&StrictPriorityQueue::m_secondPort),
-            //         MakeUintegerChecker<uint16_t>());
             
             return tid;
         }
 
 
-        // uint32_t is priority, uint16_t is port number
         StrictPriorityQueue() {
             
         }
@@ -215,14 +62,6 @@ class StrictPriorityQueue : public DiffServ {
 
         // return the index of traffic class
         uint32_t Classify(Ptr<Packet> p) override{
-            // NS_LOG_FUNCTION(this << p);
-            // if (m_isInitialized == false)
-            // {   
-            //     // setParameters();
-            //     InitializeTrafficClass();
-            //     m_isInitialized = true;
-            // } 
-
             uint32_t classIndex = 1;
 
             for (uint32_t i = 0; i < q_class.size(); i++) {
@@ -250,6 +89,8 @@ class StrictPriorityQueue : public DiffServ {
 
         void setQ_Class(std::vector<TrafficClass*> q_class) {
             this->q_class = q_class;
+            // sort q_class from priority 0 (highest) to lowest
+            std::sort(q_class.begin(), q_class.end(), CompareTCByPriority);
         }
 
 };

@@ -29,6 +29,7 @@ class TrafficClass {
             this->maxPackets = std::numeric_limits<uint32_t>::max();
             this->weight = 0.0;
             this->priorityLevel = 0;
+            this->isDefault = false;
         }
 
         // return true if queue is not full and matches all filters
@@ -56,6 +57,10 @@ class TrafficClass {
 
         // return true if the packet matches all filters
         bool match(Ptr<Packet> p) {
+            if (this->isDefault) {
+                return true;
+            }
+
             for (Filter *f : filters) {
                 if (!f->match(p)) {
                     return false;
@@ -72,16 +77,12 @@ class TrafficClass {
             return packets == 0;
         }
 
-        uint32_t getMaxPackets() {
-            return maxPackets;
+        bool getDefault() {
+            return this->isDefault;
         }
 
-        bool setMaxPackets(uint32_t maxPackets) {
-            if (maxPackets < 0) {
-                return false;
-            }
-            this->maxPackets = maxPackets;
-            return true;
+        uint32_t getMaxPackets() {
+            return maxPackets;
         }
 
         uint32_t getPacketCount() {
@@ -92,16 +93,16 @@ class TrafficClass {
             return weight;
         }
 
+        uint32_t getPriorityLevel() {
+            return priorityLevel;
+        }
+
         bool setWeight(double_t weight) {
             if (weight < 0) {
                 return false;
             }
             this->weight = weight;
             return true;
-        }
-
-        uint32_t getPriorityLevel() {
-            return priorityLevel;
         }
 
         bool setPriorityLevel(uint32_t priorityLevel) {
@@ -111,6 +112,14 @@ class TrafficClass {
             this->priorityLevel = priorityLevel;
             return true;
         }
+        
+        bool setMaxPackets(uint32_t maxPackets) {
+            if (maxPackets < 0) {
+                return false;
+            }
+            this->maxPackets = maxPackets;
+            return true;
+        }
 
         Ptr<Packet> DoPeek() {
             if (!isEmpty()) {
@@ -118,6 +127,12 @@ class TrafficClass {
             }
             return nullptr;
         }
+
+        void setDefault(bool isDefault) {
+            this->isDefault = isDefault;
+        }
+
+
 };
 
 
