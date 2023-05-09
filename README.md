@@ -1,2 +1,14 @@
 # cs621_project2
-CS621 Project 2
+## How to run
+
+Put the project folder under ns3/scratch
+Put the config file under ns3 root folder
+
+- cd to the root, i.e. ns-3-dev
+
+You may run SPQ validation by:
+- ./ns3 run spq-validation -- --filename=config.txt
+where config.txt is the name of your config file
+
+You may run DRR validion by:
+- 
