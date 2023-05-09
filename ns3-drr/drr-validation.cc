@@ -2,6 +2,10 @@
 #include <utility>
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <string>
 
 #include "ns3/log.h"
 #include "ns3/applications-module.h"
@@ -14,18 +18,39 @@
 #include "ns3/vector.h"
 
 // #include "./model/deficit-round-robin.h"
-#include "./model/test-drr.h"
+#include "./model/deficit-round-robin.h"
 #include "ns3/drop-tail-queue.h"
 
 using namespace ns3;
+
+void parse(std::vector<double_t> deficits, std::vector<uint16_t> ports, const std::string& filename);
 
 Ptr<PointToPointNetDevice> NetDeviceDynamicCast (Ptr<NetDevice> const&p)
 {
   return Ptr<PointToPointNetDevice> (dynamic_cast<PointToPointNetDevice *> (PeekPointer (p)));
 }
 
-int main () 
+int main (int argc, char *argv[]) 
 {   
+//    CommandLine cmd;
+//    std::string filename;
+//
+//    cmd.AddValue("filename", "Name of the config file", filename);
+//    cmd.Parse(argc, argv);
+//
+//    std::vector<double_t> deficit;
+//    std::vector<uint16_t> ports;
+//
+//    parse(deficit, ports, filename);
+//
+//    for (auto a : deficit) {
+//        std::cout<<a;
+//    }
+//
+//    for (auto a : ports) {
+//        std::cout<<a;
+//    }
+
     uint32_t queueNumber = 3;
     double_t deficitA = 600;
     double_t deficitB = 400;
@@ -153,3 +178,30 @@ int main ()
 
 }
 
+void parse(std::vector<double_t>& deficits, std::vector<uint16_t>& ports, const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr <<"Error opening file " << filename << std::endl;
+        return;
+    }
+
+    int n;
+    file >> n;
+
+    std::string deficit_line;
+    getline(file, deficit_line);
+    std::istringstream iss1(deficit_line);
+    int number;
+    while (iss1 >> number) {
+        deficits.push_back(number);
+    }
+
+    std::string port_line;
+    getline(file, port_line);
+    std::istringstream iss2(port_line);
+    while (iss2 >> number) {
+        ports.push_back(number);
+    }
+
+    
+}
