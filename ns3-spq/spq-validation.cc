@@ -53,14 +53,12 @@ int main (int argc, char *argv[])
     u_int32_t PriorityA = 0;
     u_int32_t PriorityB = 1;
 
-    // uint16_t node0PortA = 4001;     // high priority source port
-    // uint16_t node0PortB = 4002;     // low priority source port
     uint16_t node1PortA = 5001;     // high priority estination port
     uint16_t node1PortB = 5002;     // low priority Destination port
 
     uint32_t queueMaxPackets = 5000;   // max packet number allowed queueing in mid node
 
-    // uint32_t DEFAULT_DATA_BYTES = 1073741824;  // 0.1
+
     double DEFAULT_START_TIME = 0.0;
     double DEFAULT_END_TIME = 40.0;
 
@@ -69,12 +67,12 @@ int main (int argc, char *argv[])
     double appBStartTime = DEFAULT_START_TIME;
     double appBEndTime = DEFAULT_END_TIME ;
 
+    // if user doesn't provide a config file
+    if (priority_port.size() == 0) {
+      priority_port.emplace_back(PriorityA, node1PortA);
+      priority_port.emplace_back(PriorityB, node1PortB);
+    }
 
-    std::vector<std::pair<uint32_t, uint16_t>> priority_port(queueNumber);
-    priority_port[0].first = PriorityA; // TODO: read from config
-    priority_port[0].second = node1PortA;
-    priority_port[1].first = PriorityB;
-    priority_port[1].second = node1PortB;
 
     // Create vector of TrafficClass*
     std::vector<TrafficClass*> tc_vector;
@@ -131,7 +129,7 @@ int main (int argc, char *argv[])
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
     // Create applciation A on node 0
-    UdpClientHelper clientA (interface2.GetAddress(1), node1PortA);
+    UdpClientHelper clientA (interface2.GetAddress(1), priority_port[0].second);
     clientA.SetAttribute("Interval", TimeValue(Seconds(0.0003)));
     clientA.SetAttribute("PacketSize", UintegerValue(512));
     clientA.SetAttribute("MaxPackets", UintegerValue(0));
@@ -141,7 +139,7 @@ int main (int argc, char *argv[])
 
 
     // Create applciation B on node 0
-    UdpClientHelper clientB (interface2.GetAddress(1), node1PortB);
+    UdpClientHelper clientB (interface2.GetAddress(1), priority_port[1].second);
     clientB.SetAttribute("Interval", TimeValue(Seconds(0.0003)));
     clientB.SetAttribute("PacketSize", UintegerValue(512));
     clientB.SetAttribute("MaxPackets", UintegerValue(0));
@@ -150,13 +148,13 @@ int main (int argc, char *argv[])
     appContB.Stop(Seconds(appBEndTime));  
 
     // Create the first UdpServerHelper instance
-    UdpServerHelper serverA (node1PortA);
+    UdpServerHelper serverA (priority_port[0].second);
     ApplicationContainer serverAppsA = serverA.Install (nodes.Get(2));
     serverAppsA.Start (Seconds(DEFAULT_START_TIME));
     serverAppsA.Stop (Seconds(DEFAULT_END_TIME));
 
     // Create the second UdpServerHelper instance
-    UdpServerHelper serverB (node1PortB);
+    UdpServerHelper serverB (priority_port[1].second);
     ApplicationContainer serverAppsB = serverB.Install (nodes.Get(2));
     serverAppsB.Start (Seconds(DEFAULT_START_TIME));
     serverAppsB.Stop (Seconds(DEFAULT_END_TIME));

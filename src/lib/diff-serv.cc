@@ -9,7 +9,7 @@ using namespace ns3;
 
 class DiffServ : public Queue<Packet> {
     private:
-        // std::vector<TrafficClass*> q_class;
+        std::vector<TrafficClass*> q_class;
 
         bool DoEnqueue(Ptr<Packet> p) {
             //printf("[DiffServ] DoEnqueue queue len %ld\n", q_class.size());
@@ -19,19 +19,33 @@ class DiffServ : public Queue<Packet> {
         }
 
         Ptr<Packet> DoDequeue() {
-            return Schedule();
+            Ptr<Packet> p = nullptr;
+            uint32_t count = 0;
+            while (p == nullptr && count < q_class.size()) {
+                p = Schedule();
+                count++;
+            }
+            return p;
         }
 
         Ptr<Packet> DoRemove() {
             return Schedule();
         }
 
-        Ptr<const Packet> DoPeek() const {
-            return 0; // TODO: ???
+        Ptr<const Packet> DoPeek() const{
+            return 0;
         }
 
     protected:
-        std::vector<TrafficClass*> q_class;
+
+        std::vector<TrafficClass*> getQClass() {
+            return this->q_class;
+        }
+
+        void setQClass(std::vector<TrafficClass*> q_class) {
+            this->q_class = q_class;
+        }
+
 
     public:
         virtual Ptr<Packet> Schedule() = 0;
@@ -47,11 +61,16 @@ class DiffServ : public Queue<Packet> {
             return DoDequeue();
         }
 
-        Ptr<const Packet> Peek() const  {
+        Ptr<const Packet> Peek() const{
             return DoPeek();
         }
         
         Ptr<Packet> Remove() override {
             return DoRemove();
         }
+
+        
+
+
+
 };  
