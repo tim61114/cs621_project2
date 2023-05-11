@@ -22,7 +22,7 @@
 #include "ns3/pcap-file.h"
 #include "ns3/vector.h"
 
-#include "./model/strict-priority-queue.cc"
+#include "./model/strict-priority-queue.h"
 #include "ns3/drop-tail-queue.h"
 
 
