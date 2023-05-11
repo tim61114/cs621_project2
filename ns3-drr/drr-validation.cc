@@ -13,8 +13,7 @@
 #include "ns3/pcap-file.h"
 #include "ns3/vector.h"
 
-// #include "./model/deficit-round-robin.h"
-#include "./model/test-drr.h"
+#include "./model/deficit-round-robin.h"
 #include "ns3/drop-tail-queue.h"
 
 using namespace ns3;
@@ -35,8 +34,6 @@ int main ()
     uint16_t node1PortB = 5002;     // second priority Destination port
     uint16_t node1PortC = 5003;     // third priority Destination port
 
-    //uint32_t queueMaxPackets = 50000;   // max packet number allowed queueing in mid node
-
     double DEFAULT_START_TIME = 0.0;
     double DEFAULT_END_TIME = 40.0;
 
@@ -54,7 +51,6 @@ int main ()
         // Create TrafficClass
         TrafficClass* tc = new TrafficClass();
         tc->setWeight(deficit[i]);
-        //tc->setMaxPackets(queueMaxPackets);
         tc->filters.push_back(filter1);
         tc_vector.push_back(tc);
     }
@@ -64,11 +60,11 @@ int main ()
     nodes.Create(3);
 
     PointToPointHelper p2p;
-    p2p.SetDeviceAttribute("DataRate", StringValue("40Mbps"));
+    p2p.SetDeviceAttribute("DataRate", StringValue("4Mbps"));
     p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices1 = p2p.Install(nodes.Get(0), nodes.Get(1));
 
-    p2p.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
+    p2p.SetDeviceAttribute("DataRate", StringValue("1Mbps"));
     p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices2 = p2p.Install(nodes.Get(1), nodes.Get(2));
 
