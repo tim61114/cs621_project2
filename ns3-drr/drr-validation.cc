@@ -17,7 +17,6 @@
 #include "ns3/pcap-file.h"
 #include "ns3/vector.h"
 
-// #include "./model/deficit-round-robin.h"
 #include "./model/deficit-round-robin.h"
 #include "ns3/drop-tail-queue.h"
 
@@ -30,26 +29,21 @@ Ptr<PointToPointNetDevice> NetDeviceDynamicCast (Ptr<NetDevice> const&p)
   return Ptr<PointToPointNetDevice> (dynamic_cast<PointToPointNetDevice *> (PeekPointer (p)));
 }
 
+
+void parse(std::vector<double_t>& deficits, std::vector<uint16_t>& ports, const std::string& filename);
+
 int main (int argc, char *argv[]) 
 {   
-//    CommandLine cmd;
-//    std::string filename;
-//
-//    cmd.AddValue("filename", "Name of the config file", filename);
-//    cmd.Parse(argc, argv);
-//
-//    std::vector<double_t> deficit;
-//    std::vector<uint16_t> ports;
-//
-//    parse(deficit, ports, filename);
-//
-//    for (auto a : deficit) {
-//        std::cout<<a;
-//    }
-//
-//    for (auto a : ports) {
-//        std::cout<<a;
-//    }
+    CommandLine cmd;
+    std::string filename;
+
+    cmd.AddValue("filename", "Name of the config file", filename);
+    cmd.Parse(argc, argv);
+
+    std::vector<double_t> deficit;
+    std::vector<uint16_t> ports;
+
+    parse(deficit, ports, filename);
 
     uint32_t queueNumber = 3;
     double_t deficitA = 600;
@@ -60,14 +54,14 @@ int main (int argc, char *argv[])
     uint16_t node1PortB = 5002;     // second priority Destination port
     uint16_t node1PortC = 5003;     // third priority Destination port
 
-    //uint32_t queueMaxPackets = 50000;   // max packet number allowed queueing in mid node
-
     double DEFAULT_START_TIME = 0.0;
     double DEFAULT_END_TIME = 40.0;
 
+    if (deficit.size() < 2 || ports.size() < 2) {
+        ports = { node1PortA, node1PortB, node1PortC };
+        deficit = { deficitA, deficitB, deficitC };
+    }
 
-    std::vector<uint16_t> ports = { node1PortA, node1PortB, node1PortC };
-    std::vector<double_t> deficit = { deficitA, deficitB, deficitC };
 
     // Create vector of TrafficClass*
     std::vector<TrafficClass*> tc_vector;
@@ -79,7 +73,6 @@ int main (int argc, char *argv[])
         // Create TrafficClass
         TrafficClass* tc = new TrafficClass();
         tc->setWeight(deficit[i]);
-        //tc->setMaxPackets(queueMaxPackets);
         tc->filters.push_back(filter1);
         tc_vector.push_back(tc);
     }
@@ -89,11 +82,11 @@ int main (int argc, char *argv[])
     nodes.Create(3);
 
     PointToPointHelper p2p;
-    p2p.SetDeviceAttribute("DataRate", StringValue("40Mbps"));
+    p2p.SetDeviceAttribute("DataRate", StringValue("4Mbps"));
     p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices1 = p2p.Install(nodes.Get(0), nodes.Get(1));
 
-    p2p.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
+    p2p.SetDeviceAttribute("DataRate", StringValue("1Mbps"));
     p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices2 = p2p.Install(nodes.Get(1), nodes.Get(2));
 
@@ -106,7 +99,6 @@ int main (int argc, char *argv[])
     // Install SPQ on router1
     Ptr<DeficitRoundRobin> drr = m_drrFactory.Create<DeficitRoundRobin>();
     drr->setQ_Class(tc_vector);
-    drr->setDeficit(deficit);
     Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
     devR1->SetQueue(drr);
 
@@ -188,20 +180,19 @@ void parse(std::vector<double_t>& deficits, std::vector<uint16_t>& ports, const 
     int n;
     file >> n;
 
-    std::string deficit_line;
-    getline(file, deficit_line);
-    std::istringstream iss1(deficit_line);
-    int number;
-    while (iss1 >> number) {
-        deficits.push_back(number);
-    }
-
-    std::string port_line;
-    getline(file, port_line);
-    std::istringstream iss2(port_line);
-    while (iss2 >> number) {
-        ports.push_back(number);
+    std::string line;
+    getline(file, line); // read the newline after n
+    for (int i = 0; i < n; i++) {
+        getline(file, line);
+        std::istringstream iss(line);
+        uint32_t x;
+        uint16_t y;
+        char comma;
+        iss >> x >> comma >> y;
+        deficits.push_back(x);
+        ports.push_back(y);
     }
 
     
 }
+

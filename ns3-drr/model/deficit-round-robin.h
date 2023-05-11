@@ -59,9 +59,10 @@ class DeficitRoundRobin : public DiffServ {
                 
                 refresh = false;
             }
+
+            std::vector<TrafficClass*> q_class = DiffServ::getQClass();
             
             //Serve current queue
-            std::vector<TrafficClass*> q_class = DiffServ::getQClass();
             if (!q_class[m_currentTCIndex]->isEmpty() && 
                     q_class[m_currentTCIndex]->DoPeek()->GetSize() <= m_curDeficit[m_currentTCIndex]) {
                 m_curDeficit[m_currentTCIndex] -= q_class[m_currentTCIndex]->DoPeek()->GetSize();
@@ -73,6 +74,7 @@ class DeficitRoundRobin : public DiffServ {
                 m_curDeficit[m_currentTCIndex] = 0;
             }
             
+
             //Current queue can no longer be served
             if (q_class[m_currentTCIndex]->isEmpty() ||
                     q_class[m_currentTCIndex]->DoPeek()->GetSize() > m_curDeficit[m_currentTCIndex]) {
@@ -90,17 +92,13 @@ class DeficitRoundRobin : public DiffServ {
             DiffServ::setQClass(q_class);
         }
 
-        void setDeficit(std::vector<double_t> deficit) {
-            m_deficit = deficit;
-        } 
-
 
     private:
         uint32_t m_currentTCIndex = 0;
         uint32_t m_numPackets = 0;
 
         uint32_t m_queueNumber;
-        std::vector<double_t> m_deficit;
+
         std::vector<double_t> m_curDeficit = {0, 0, 0};
         uint16_t m_firstPort;
         uint16_t m_secondPort;
@@ -122,8 +120,10 @@ class DeficitRoundRobin : public DiffServ {
         }
 
         void RefreshDeficit() {
-            for (size_t i = 0; i < m_deficit.size(); ++i) {
-                m_curDeficit[i] += m_deficit[i];
+            std::vector<TrafficClass*> q_class = DiffServ::getQClass();
+            for (size_t i = 0; i < m_curDeficit.size(); ++i) {
+                m_curDeficit[i] += q_class[i]->getWeight();
+
             }
         }
 

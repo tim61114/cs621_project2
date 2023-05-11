@@ -56,7 +56,7 @@ int main (int argc, char *argv[])
     uint16_t node1PortA = 5001;     // high priority estination port
     uint16_t node1PortB = 5002;     // low priority Destination port
 
-    uint32_t queueMaxPackets = 5000;   // max packet number allowed queueing in mid node
+    uint32_t queueMaxPackets = 1500;   // max packet number allowed queueing in mid node
 
     double DEFAULT_START_TIME = 0.0;
     double DEFAULT_END_TIME = 40.0;
@@ -95,11 +95,11 @@ int main (int argc, char *argv[])
     nodes.Create(3);
 
     PointToPointHelper p2p;
-    p2p.SetDeviceAttribute("DataRate", StringValue("40Mbps"));
+    p2p.SetDeviceAttribute("DataRate", StringValue("4Mbps"));
     p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices1 = p2p.Install(nodes.Get(0), nodes.Get(1));
 
-    p2p.SetDeviceAttribute("DataRate", StringValue("10Mbps"));
+    p2p.SetDeviceAttribute("DataRate", StringValue("1Mbps"));
     p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
     NetDeviceContainer devices2 = p2p.Install(nodes.Get(1), nodes.Get(2));
 
