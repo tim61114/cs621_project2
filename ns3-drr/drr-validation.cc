@@ -77,7 +77,6 @@ int main ()
     // Install SPQ on router1
     Ptr<DeficitRoundRobin> drr = m_drrFactory.Create<DeficitRoundRobin>();
     drr->setQ_Class(tc_vector);
-    drr->setDeficit(deficit);
     Ptr<PointToPointNetDevice> devR1 = NetDeviceDynamicCast(devices2.Get(0));
     devR1->SetQueue(drr);
 
