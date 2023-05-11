@@ -24,19 +24,6 @@ class StrictPriorityQueue : public DiffServ {
         bool m_isInitialized = false;
         std::vector<TrafficClass*> m_tc_vector;
 
-        // // return the next packet
-        // Ptr<const Packet> DoPeek() override{
-        //     Ptr<Packet> p;
-        //     std::vector<TrafficClass*> q_class = DiffServ::getQClass();
-        //     for (TrafficClass *tc : q_class) {
-        //         if (!tc->isEmpty()) {
-        //             return tc->DoPeek();
-        //         }
-        //     }
-        //     return nullptr;
-        // }
-
-        // comparater for TrafficClass by Priority
         static bool CompareTCByPriority(TrafficClass* tc1, TrafficClass* tc2) {
             return tc1->getPriorityLevel() < tc2->getPriorityLevel();
         }
@@ -55,11 +42,9 @@ class StrictPriorityQueue : public DiffServ {
             return tid;
         }
 
-
         StrictPriorityQueue() {
             
         }
-
 
         // return the index of traffic class
         uint32_t Classify(Ptr<Packet> p) override{
@@ -67,14 +52,12 @@ class StrictPriorityQueue : public DiffServ {
             std::vector<TrafficClass*> q_class = DiffServ::getQClass();
             for (uint32_t i = 0; i < q_class.size(); i++) {
                 if (q_class[i]->match(p)) {
-                    // NS_LOG_INFO("\tclassifier: queue " << i << " matches." );
                     classIndex = i;
                     
                     break;
                 }
             }
             
-            //printf("[SPQ] Classify: ClassIndex: %d\n", classIndex);
             return classIndex;
         }
 

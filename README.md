@@ -7,8 +7,8 @@ Put the config file under ns3 root folder
 - cd to the root, i.e. ns-3-dev
 
 You may run SPQ validation by:
-- ./ns3 run spq-validation -- --filename=config.txt
+- ./ns3 run spq-validation -- --filename=config-spq.txt
 where config.txt is the name of your config file
 
 You may run DRR validion by:
-- 
+- ./ns3 run drr-validation -- --filename=config-drr.txt
