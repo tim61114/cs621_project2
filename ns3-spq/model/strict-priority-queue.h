@@ -1,3 +1,6 @@
+#ifndef STRICT_PRIORITY_QUEUE_H
+#define STRICT_PRIORITY_QUEUE_H
+
 #include <utility>
 #include <vector>
 #include <cstdint>
@@ -81,3 +84,5 @@ class StrictPriorityQueue : public DiffServ {
 };
 
 NS_OBJECT_ENSURE_REGISTERED(StrictPriorityQueue);
+
+#endif

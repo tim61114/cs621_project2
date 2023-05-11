@@ -58,7 +58,6 @@ int main (int argc, char *argv[])
 
     uint32_t queueMaxPackets = 1500;   // max packet number allowed queueing in mid node
 
-
     double DEFAULT_START_TIME = 0.0;
     double DEFAULT_END_TIME = 40.0;
 
@@ -69,8 +68,8 @@ int main (int argc, char *argv[])
 
     // if user doesn't provide a config file
     if (priority_port.size() == 0) {
-      priority_port.emplace_back(PriorityA, node1PortA);
-      priority_port.emplace_back(PriorityB, node1PortB);
+        priority_port.emplace_back(PriorityA, node1PortA);
+        priority_port.emplace_back(PriorityB, node1PortB);
     }
 
 
@@ -158,7 +157,6 @@ int main (int argc, char *argv[])
     ApplicationContainer serverAppsB = serverB.Install (nodes.Get(2));
     serverAppsB.Start (Seconds(DEFAULT_START_TIME));
     serverAppsB.Stop (Seconds(DEFAULT_END_TIME));
-
 
     p2p.EnablePcapAll("dvc", true);
 

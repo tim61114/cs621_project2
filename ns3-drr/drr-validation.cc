@@ -2,6 +2,10 @@
 #include <utility>
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <string>
 
 #include "ns3/log.h"
 #include "ns3/applications-module.h"
@@ -18,10 +22,13 @@
 
 using namespace ns3;
 
+void parse(std::vector<double_t> deficits, std::vector<uint16_t> ports, const std::string& filename);
+
 Ptr<PointToPointNetDevice> NetDeviceDynamicCast (Ptr<NetDevice> const&p)
 {
   return Ptr<PointToPointNetDevice> (dynamic_cast<PointToPointNetDevice *> (PeekPointer (p)));
 }
+
 
 void parse(std::vector<double_t>& deficits, std::vector<uint16_t>& ports, const std::string& filename);
 
@@ -186,22 +193,6 @@ void parse(std::vector<double_t>& deficits, std::vector<uint16_t>& ports, const 
         ports.push_back(y);
     }
 
-    // std::string deficit_line;
-    // getline(file, deficit_line);
-    // std::istringstream iss1(deficit_line);
-    // int number;
-    // char comma;
-    // while (iss1 >> number) {
-    //     deficits.push_back(number);
-    //     iss1 >> comma;
-    // }
-
-    // std::string port_line;
-    // getline(file, port_line);
-    // std::istringstream iss2(port_line);
-    // while (iss2 >> number) {
-    //     ports.push_back(number);
-    // }
-
     
 }
+
